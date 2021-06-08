@@ -1,10 +1,10 @@
-package com.plooh.adssi.dial.utils;
+package com.plooh.adssi.dial.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JsonUtils {
+public class JSON {
     public static ObjectMapper MAPPER;
 
     static {

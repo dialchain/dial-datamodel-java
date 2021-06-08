@@ -11,13 +11,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.Ed25519Signer;
 import com.nimbusds.jose.crypto.Ed25519Verifier;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.util.Base64URL;
-import com.plooh.adssi.dial.utils.JCSUtils;
-import com.plooh.adssi.dial.utils.JsonUtils;
+import com.plooh.adssi.dial.jcs.JCS;
+import com.plooh.adssi.dial.json.JSON;
 
 public class JcsBase64Ed25519Signature2021Service {
 
@@ -49,38 +48,38 @@ public class JcsBase64Ed25519Signature2021Service {
         HashMap<String, Object> signHeaderData = new HashMap<String, Object>(headerParams);
         signHeaderData.remove(SIGNATURE_VALUE_FIELD);
         signHeaderData.put(SIGNATURE_TYPE_FIELD, SIGNATURE_TYPE);
-        String jwsHeaderJson = JsonUtils.MAPPER.writeValueAsString(signHeaderData);
-        String jwsHeaderJCSBase64 = jcs_utf8_base64url(jwsHeaderJson).toString();
-        String jwsPayloadString = jcs_utf8_base64url(datJson).toString();
-        byte[] signingInput = (jwsHeaderJCSBase64 + "." + jwsPayloadString).getBytes(StandardCharsets.UTF_8);
-
-        // Ed25519 signature
-        Ed25519Signer ed25519Signer = new Ed25519Signer(keyPair);
+        String jwsHeaderJson = JSON.MAPPER.writeValueAsString(signHeaderData);
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.EdDSA).build();
-        Base64URL sign = ed25519Signer.sign(jwsHeader, signingInput);
-        HashMap<String, Object> result = JsonUtils.MAPPER.readValue(jwsHeaderJson, typeRefMap);
+
+        Ed25519Signer ed25519Signer = new Ed25519Signer(keyPair);
+        Base64URL sign = ed25519Signer.sign(jwsHeader, signingInput(jwsHeaderJson, datJson));
+        HashMap<String, Object> result = JSON.MAPPER.readValue(jwsHeaderJson, typeRefMap);
         result.put(SIGNATURE_VALUE_FIELD, sign.toString());
 
         return result;
     }
 
-    private static boolean verifyInternal(String dataJson, OctetKeyPair publicJWK, Map<String, Object> headerParams)
+    private static boolean verifyInternal(String dataJson, OctetKeyPair publicKey, Map<String, Object> headerParams)
             throws JOSEException, JsonProcessingException, ParseException {
 
         HashMap<String, Object> signHeaderData = new HashMap<String, Object>(headerParams);
         signHeaderData.remove(SIGNATURE_VALUE_FIELD);
         signHeaderData.put(SIGNATURE_TYPE_FIELD, SIGNATURE_TYPE);
-        // JWSHeader jwsHeader = new
-        // JWSHeader.Builder(JWSAlgorithm.EdDSA).customParams(hashMap).build();
-        String jwsHeaderJson = JsonUtils.MAPPER.writeValueAsString(signHeaderData);
-        Base64URL jwsHeaderJCSBase64 = jcs_utf8_base64url(jwsHeaderJson);
-        Base64URL jwsPayloadBase64 = jcs_utf8_base64url(dataJson);
-        JWSObject jwsObject = new JWSObject(jwsHeaderJCSBase64, jwsPayloadBase64,
+        String jwsHeaderJson = JSON.MAPPER.writeValueAsString(signHeaderData);
+        JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.EdDSA).build();
+
+        Ed25519Verifier ed25519Verifier = new Ed25519Verifier(publicKey);
+        return ed25519Verifier.verify(jwsHeader, signingInput(jwsHeaderJson, dataJson),
                 Base64URL.from(headerParams.get(SIGNATURE_VALUE_FIELD).toString()));
-        return jwsObject.verify(new Ed25519Verifier(publicJWK));
+    }
+
+    private static byte[] signingInput(String jwsHeaderJson, String datJson) {
+        String jwsHeaderJCSBase64 = jcs_utf8_base64url(jwsHeaderJson).toString();
+        String jwsPayloadString = jcs_utf8_base64url(datJson).toString();
+        return (jwsHeaderJCSBase64 + "." + jwsPayloadString).getBytes(StandardCharsets.UTF_8);
     }
 
     private static Base64URL jcs_utf8_base64url(final String input) {
-        return Base64URL.encode(JCSUtils.encode(input));
+        return Base64URL.encode(JCS.encode(input));
     }
 }

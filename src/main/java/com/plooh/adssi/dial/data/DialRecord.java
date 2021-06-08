@@ -1,6 +1,5 @@
 package com.plooh.adssi.dial.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;

@@ -1,10 +1,10 @@
-package com.plooh.adssi.dial.utils;
+package com.plooh.adssi.dial.jcs;
 
 import java.io.IOException;
 
 import org.erdtman.jcs.JsonCanonicalizer;
 
-public class JCSUtils {
+public class JCS {
     public static String encode(String l) {
         try {
             return new JsonCanonicalizer(l).getEncodedString();
