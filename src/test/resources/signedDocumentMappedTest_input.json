@@ -1,0 +1,28 @@
+{
+    "id": "mYmYzYmUyM2MtNTUzYS00NzE3LWIzNTYtN2E1OTkxMjhmYWEw",
+    "type": "Declaration",
+    "declaration": [
+        {
+            "type": "Participant",
+            "id": "mODc3Y2YwZjUtYzIyNC00YWUxLTlkOTctZjY2NzQ3YTRhYzA2",
+            "created": "2021-06-09T00:58:16.806708Z",
+            "controller": [
+                "mODc3Y2YwZjUtYzIyNC00YWUxLTlkOTctZjY2NzQ3YTRhYzA2"
+            ],
+            "verificationMethod": [
+                {
+                    "type": "Ed25519VerificationKey2021",
+                    "id": "mODc3Y2YwZjUtYzIyNC00YWUxLTlkOTctZjY2NzQ3YTRhYzA2#2021-06-09T00:58:16.806708Z#key-0",
+                    "publicKeyMultibase": "zEh17YGgpZSBT3iqLfPR6oTeryAk2jyDNdPk9sT5LRu7h"
+                }
+            ],
+            "assertionMethod": [
+                {
+                    "type": "Signature",
+                    "id": "mODc3Y2YwZjUtYzIyNC00YWUxLTlkOTctZjY2NzQ3YTRhYzA2#2021-06-09T00:58:16.806708Z#am-0",
+                    "verificationMethod": "mODc3Y2YwZjUtYzIyNC00YWUxLTlkOTctZjY2NzQ3YTRhYzA2#2021-06-09T00:58:16.806708Z#key-0"
+                }
+            ]
+        }
+    ]
+}

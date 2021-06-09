@@ -1,13 +1,10 @@
 package com.plooh.adssi.dial.crypto;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -15,62 +12,96 @@ import com.nimbusds.jose.crypto.Ed25519Signer;
 import com.nimbusds.jose.crypto.Ed25519Verifier;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.util.Base64URL;
+import com.plooh.adssi.dial.data.Proof;
 import com.plooh.adssi.dial.jcs.JCS;
 import com.plooh.adssi.dial.json.JSON;
+import com.plooh.adssi.dial.parser.SignedDocumentMapped;
+import com.plooh.adssi.dial.parser.TimeFormat;
 
 public class JcsBase64Ed25519Signature2021Service {
 
-    public static final String SIGNATURE_VALUE_FIELD = "signatureValue";
-    public static final String SIGNATURE_TYPE_FIELD = "type";
     public static final String SIGNATURE_TYPE = "JcsBase64Ed25519Signature2021";
-    public static final TypeReference<HashMap<String, Object>> typeRefMap = new TypeReference<HashMap<String, Object>>() {
-    };
 
-    public static boolean verify(String data, OctetKeyPair publicJWK, Map<String, Object> headerParams) {
+    public static boolean verify(String recordJson, OctetKeyPair publicJWK, Proof proof) {
         try {
-            return verifyInternal(data, publicJWK, headerParams);
-        } catch (JOSEException | ParseException | JsonProcessingException e) {
+            return verifyInternal(recordJson, publicJWK, proof);
+        } catch (JOSEException | JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static Map<String, Object> sign(String data, OctetKeyPair keyPair, Map<String, Object> headerParams) {
+    public static String sign(String recordJson, OctetKeyPair keyPair, Proof proof) {
         try {
-            return signInternal(data, keyPair, headerParams);
-        } catch (IOException | JOSEException e) {
+            return signInternal(recordJson, keyPair, proof);
+        } catch (JsonProcessingException | JOSEException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Map<String, Object> signInternal(String datJson, OctetKeyPair keyPair,
-            Map<String, Object> headerParams) throws IOException, JOSEException {
-        // header payload
-        HashMap<String, Object> signHeaderData = new HashMap<String, Object>(headerParams);
-        signHeaderData.remove(SIGNATURE_VALUE_FIELD);
-        signHeaderData.put(SIGNATURE_TYPE_FIELD, SIGNATURE_TYPE);
-        String jwsHeaderJson = JSON.MAPPER.writeValueAsString(signHeaderData);
+    private static String signInternal(String recordJson, OctetKeyPair keyPair, Proof proof)
+            throws JOSEException, JsonProcessingException {
+
+        // Set date if missing
+        if (proof.getCreated() == null) {
+            proof.setCreated(TimeFormat.DTF.format(Instant.now()));
+        }
+
+        // If missing assertion method
+        if (proof.getAssertionMethod() == null || proof.getAssertionMethod().isEmpty()) {
+            throw new IllegalStateException("Missing assertion method");
+        }
+
+        // IF missing issuer
+        if (proof.getIssuer() == null) {
+            throw new IllegalStateException("Missing issuer");
+        }
+
+        // set signature type
+        proof.setType(SIGNATURE_TYPE);
+
+        if (proof.getNonce() == null) {
+            proof.setNonce(UUID.randomUUID().toString());
+        }
+
+        // Signature header is the proof body without signature value
+        proof.setSignatureValue(null);
+        String jwsHeaderJson = JSON.MAPPER.writeValueAsString(proof);
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.EdDSA).build();
+
+        // Remove all proofs from signature payload
+        String signaturePayload = new SignedDocumentMapped(recordJson).deleteProof().toJson();
 
         Ed25519Signer ed25519Signer = new Ed25519Signer(keyPair);
-        Base64URL sign = ed25519Signer.sign(jwsHeader, signingInput(jwsHeaderJson, datJson));
-        HashMap<String, Object> result = JSON.MAPPER.readValue(jwsHeaderJson, typeRefMap);
-        result.put(SIGNATURE_VALUE_FIELD, sign.toString());
+        Base64URL sign = ed25519Signer.sign(jwsHeader, signingInput(jwsHeaderJson, signaturePayload));
+        proof.setSignatureValue(sign.toString());
 
-        return result;
+        // Add the proof to the json object and return document.
+        return new SignedDocumentMapped(recordJson).addProof(proof).toJson();
     }
 
-    private static boolean verifyInternal(String dataJson, OctetKeyPair publicKey, Map<String, Object> headerParams)
-            throws JOSEException, JsonProcessingException, ParseException {
+    private static boolean verifyInternal(String recordJson, OctetKeyPair publicKey, Proof proof)
+            throws JOSEException, JsonProcessingException {
 
-        HashMap<String, Object> signHeaderData = new HashMap<String, Object>(headerParams);
-        signHeaderData.remove(SIGNATURE_VALUE_FIELD);
-        signHeaderData.put(SIGNATURE_TYPE_FIELD, SIGNATURE_TYPE);
-        String jwsHeaderJson = JSON.MAPPER.writeValueAsString(signHeaderData);
+        String signatureValue = proof.getSignatureValue();
+        if (signatureValue == null) {
+            throw new IllegalStateException("Missing signature value");
+        }
+
+        if (!SIGNATURE_TYPE.equals(proof.getType())) {
+            throw new IllegalStateException("Wrong signature type");
+        }
+
+        // Signature header is the proof body without signature value
+        proof.setSignatureValue(null);
+        String jwsHeaderJson = JSON.MAPPER.writeValueAsString(proof);
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.EdDSA).build();
 
+        // Remove all proofs from signature payload
+        String signaturePayload = new SignedDocumentMapped(recordJson).deleteProof().toJson();
+
         Ed25519Verifier ed25519Verifier = new Ed25519Verifier(publicKey);
-        return ed25519Verifier.verify(jwsHeader, signingInput(jwsHeaderJson, dataJson),
-                Base64URL.from(headerParams.get(SIGNATURE_VALUE_FIELD).toString()));
+        return ed25519Verifier.verify(jwsHeader, signingInput(jwsHeaderJson, signaturePayload),
+                Base64URL.from(signatureValue));
     }
 
     private static byte[] signingInput(String jwsHeaderJson, String datJson) {

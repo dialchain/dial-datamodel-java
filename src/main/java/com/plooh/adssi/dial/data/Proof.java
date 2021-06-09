@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class Proof {
-    private String declaration;
+    private String document;
     private String issuer;
     private String created;
     private String type;

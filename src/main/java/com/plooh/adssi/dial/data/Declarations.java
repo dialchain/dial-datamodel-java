@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class Declarations {
-    private String id;
-    private List<Declaration> entries = new ArrayList<>();
+public class Declarations extends SignedDocument {
+    private List<Declaration> declaration = new ArrayList<>();
 }
