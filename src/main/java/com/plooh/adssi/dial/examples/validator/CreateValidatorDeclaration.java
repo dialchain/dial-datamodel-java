@@ -9,7 +9,6 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.plooh.adssi.dial.data.AddressType;
 import com.plooh.adssi.dial.data.Declarations;
-import com.plooh.adssi.dial.data.DialRecord;
 import com.plooh.adssi.dial.data.OrganizationDeclaration;
 import com.plooh.adssi.dial.data.OrganizationMember;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
@@ -22,13 +21,13 @@ import com.plooh.adssi.dial.parser.TimeFormat;
 public class CreateValidatorDeclaration {
     public String handle(Instant dateTime, List<ParticipantDeclaration> nodes) throws JsonProcessingException {
         String creationDate = TimeFormat.DTF.format(dateTime);
-        DialRecord dr = new DialRecord();
-        dr.setDeclaration(new Declarations());
-        dr.getDeclaration().setId(AddressType.uuid.normalize(UUID.randomUUID().toString()));
-        dr.getDeclaration().setEntries(new ArrayList<>());
+        Declarations declarations = new Declarations();
+        declarations.setId(AddressType.uuid.normalize(UUID.randomUUID().toString()));
+        declarations.setType("Declaration");
+        declarations.setDeclaration(new ArrayList<>());
 
         OrganizationDeclaration organizationDeclaration = new OrganizationDeclaration();
-        dr.getDeclaration().getEntries().add(organizationDeclaration);
+        declarations.getDeclaration().add(organizationDeclaration);
         organizationDeclaration.setCreated(creationDate);
         organizationDeclaration.setId(AddressType.uuid.normalize(UUID.randomUUID().toString()));
         organizationDeclaration.setController(Arrays.asList(organizationDeclaration.getId()));
@@ -55,7 +54,7 @@ public class CreateValidatorDeclaration {
         addService(organizationDeclaration, 0, "https://open.first-dial-validator.io/lookup",
                 ServiceNames.LookupService.name());
 
-        return JSON.MAPPER.writeValueAsString(dr);
+        return JSON.MAPPER.writeValueAsString(declarations);
     }
 
     private void addService(OrganizationDeclaration organizationDeclaration, int index, String url,

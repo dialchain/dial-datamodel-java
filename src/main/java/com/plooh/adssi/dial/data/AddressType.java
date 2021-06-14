@@ -1,9 +1,6 @@
 package com.plooh.adssi.dial.data;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import org.apache.commons.lang.CharSetUtils;
 
 import io.ipfs.multibase.Multibase;
 

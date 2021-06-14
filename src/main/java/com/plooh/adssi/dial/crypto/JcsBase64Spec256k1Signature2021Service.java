@@ -1,17 +1,18 @@
 package com.plooh.adssi.dial.crypto;
 
+import java.security.interfaces.ECPublicKey;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.Ed25519Signer;
-import com.nimbusds.jose.crypto.Ed25519Verifier;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.OctetKeyPair;
 
-public class JcsBase64Ed25519Signature2021Service extends JcsBase64EcSignature2021Service {
+public class JcsBase64Spec256k1Signature2021Service extends JcsBase64EcSignature2021Service {
 
-    static final String SIGNATURE_TYPE = "JcsBase64Ed25519Signature2021";
+    static final String SIGNATURE_TYPE = "JcsBase64Spec256k1Signature2021";
 
     @Override
     public String signatureType() {
@@ -20,16 +21,16 @@ public class JcsBase64Ed25519Signature2021Service extends JcsBase64EcSignature20
 
     @Override
     protected JWSSigner jwsSigner(JWK keyPair) throws JOSEException {
-        return new Ed25519Signer((OctetKeyPair) keyPair);
+        return new ECDSASigner(keyPair.toECKey());
     }
 
     @Override
     protected JWSVerifier jwsVerifier(JWK publicKey) throws JOSEException {
-        return new Ed25519Verifier((OctetKeyPair) publicKey);
+        return new ECDSAVerifier(publicKey.toECKey().toECPublicKey());
     }
 
     @Override
     protected JWSAlgorithm jwsAlgorithm() {
-        return JWSAlgorithm.EdDSA;
+        return JWSAlgorithm.ES256K;
     }
 }
