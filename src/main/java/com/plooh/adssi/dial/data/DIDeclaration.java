@@ -11,6 +11,7 @@ public abstract class DIDeclaration extends Declaration {
     private String id;
     private String created;
     private List<String> controller;
+    private List<TreasuryAccount> account;
 
     public DIDeclaration(String type) {
         super(type);

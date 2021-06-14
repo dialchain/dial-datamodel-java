@@ -5,12 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import com.plooh.adssi.dial.crypto.JcsBase64Ed25519Signature2021Service;
+import com.plooh.adssi.dial.crypto.CryptoService;
+import com.plooh.adssi.dial.crypto.JcsBase64EcSignature2021Service;
 import com.plooh.adssi.dial.data.OrganizationDeclaration;
-import com.plooh.adssi.dial.data.OrganizationMember;
+import com.plooh.adssi.dial.data.ParticipantDeclaration;
 import com.plooh.adssi.dial.data.Proof;
+import com.plooh.adssi.dial.data.SignatureAssertionMethod;
 import com.plooh.adssi.dial.data.VoteAssertionMethod;
 import com.plooh.adssi.dial.examples.participant.NewParticipantDeclaration;
+import com.plooh.adssi.dial.examples.participant.VerificationMethodData;
 import com.plooh.adssi.dial.examples.validator.ValidatorMemberParticipant;
 import com.plooh.adssi.dial.parser.OrganizationDeclarationMapped;
 import com.plooh.adssi.dial.parser.ParticipantDeclarationMapped;
@@ -29,14 +32,20 @@ public class SignPublications {
         String creationDate = TimeFormat.DTF.format(dateTime);
         OrganizationDeclarationMapped orgRecord = new OrganizationDeclarationMapped(orgRecordString);
         OrganizationDeclaration orgDeclaration = orgRecord.declarations().get(0);
-        VoteAssertionMethod voteAssertionMethod = orgDeclaration.getAssertionMethod().get(0);
 
         ParticipantDeclarationMapped participantRecord = new ParticipantDeclarationMapped(participant.getRecord());
-        List<OrganizationMember> members = voteAssertionMethod.getMember();
-        ValidatorMemberParticipant memberParticipant = ValidatorMemberParticipant.findMember(members,
-                participantRecord.declarations());
-        List<String> assertionMethods = Arrays.asList(voteAssertionMethod.getId(),
-                memberParticipant.getParticipant().getAssertionMethod().get(0).getId());
+        VoteAssertionMethod voteAssertionMethod = orgDeclaration.getAssertionMethod().get(0);
+        List<ParticipantDeclaration> participantdeclarations = participantRecord.declarations();
+        ValidatorMemberParticipant memberParticipant = ValidatorMemberParticipant
+                .findMember(voteAssertionMethod.getMember(), participantdeclarations);
+
+        SignatureAssertionMethod signatureAssertionmethod = memberParticipant.getParticipant().getAssertionMethod()
+                .get(0);
+
+        List<String> assertionMethods = Arrays.asList(voteAssertionMethod.getId(), signatureAssertionmethod.getId(),
+                signatureAssertionmethod.getVerificationMethod());
+        VerificationMethodData verificationMethodData = participant.getVerificationMethod()
+                .get(signatureAssertionmethod.getVerificationMethod());
 
         SignedDocumentMapped sdm = new SignedDocumentMapped(publicationString);
 
@@ -47,6 +56,8 @@ public class SignPublications {
         proof.setCreated(creationDate);
         proof.setNonce(UUID.randomUUID().toString());
 
-        return JcsBase64Ed25519Signature2021Service.sign(publicationString, participant.getKeyPair(), proof);
+        JcsBase64EcSignature2021Service signatureService = CryptoService
+                .findSignatureServiceForKey(verificationMethodData.getVerificationMethod().getType());
+        return signatureService.sign(publicationString, verificationMethodData.getKeyPair(), proof);
     }
 }
