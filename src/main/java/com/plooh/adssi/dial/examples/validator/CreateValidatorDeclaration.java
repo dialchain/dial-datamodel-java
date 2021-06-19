@@ -1,5 +1,6 @@
 package com.plooh.adssi.dial.examples.validator;
 
+import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +8,11 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.JWK;
+import com.plooh.adssi.dial.crypto.BitcoinAddress;
+import com.plooh.adssi.dial.crypto.CommonCurveKeyService;
+import com.plooh.adssi.dial.crypto.CryptoService;
 import com.plooh.adssi.dial.data.AddressType;
 import com.plooh.adssi.dial.data.Declarations;
 import com.plooh.adssi.dial.data.OrganizationDeclaration;
@@ -14,12 +20,18 @@ import com.plooh.adssi.dial.data.OrganizationMember;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
 import com.plooh.adssi.dial.data.Service;
 import com.plooh.adssi.dial.data.ServiceNames;
+import com.plooh.adssi.dial.data.TreasuryAccount;
+import com.plooh.adssi.dial.data.TreasuryAccountControler;
+import com.plooh.adssi.dial.data.VerificationMethod;
 import com.plooh.adssi.dial.data.VoteAssertionMethod;
 import com.plooh.adssi.dial.json.JSON;
 import com.plooh.adssi.dial.parser.TimeFormat;
 
+import org.bitcoinj.params.MainNetParams;
+
 public class CreateValidatorDeclaration {
-    public String handle(Instant dateTime, List<ParticipantDeclaration> nodes) throws JsonProcessingException {
+    public String handle(Instant dateTime, List<ParticipantDeclaration> nodes)
+            throws JsonProcessingException, JOSEException {
         String creationDate = TimeFormat.DTF.format(dateTime);
         Declarations declarations = new Declarations();
         declarations.setId(AddressType.uuid.normalize(UUID.randomUUID().toString()));
@@ -43,6 +55,29 @@ public class CreateValidatorDeclaration {
             voteAssertionMethod.getMember().add(organizationMember);
         }
         organizationDeclaration.setAssertionMethod(Arrays.asList(voteAssertionMethod));
+
+        TreasuryAccount treasuryAccount = new TreasuryAccount();
+        final List<ECPublicKey> ecPublicKeys = new ArrayList<>();
+        final List<String> verificationMethodIds = new ArrayList<>();
+        for (ParticipantDeclaration pd : nodes) {
+            VerificationMethod verificationMethod = pd.getVerificationMethod().stream()
+                    .filter(vm -> vm.getType().equals("Secp256k1VerificationKey2021")).findAny().get();
+            verificationMethodIds.add(verificationMethod.getId());
+            CommonCurveKeyService keyService = CryptoService.findKeyService(verificationMethod.getType());
+            JWK publicJWK = keyService.publicKeyFromMultibase(verificationMethod.getPublicKeyMultibase(),
+                    verificationMethod.getId());
+            ecPublicKeys.add(publicJWK.toECKey().toECPublicKey());
+        }
+        int quorum = (ecPublicKeys.size() / 2) + 1;
+
+        String p2shAddress = BitcoinAddress.p2shAddress(MainNetParams.get(), quorum, ecPublicKeys);
+        treasuryAccount.setAddress(p2shAddress);
+        treasuryAccount.setNetwork(MainNetParams.get().getId());
+        TreasuryAccountControler control = new TreasuryAccountControler();
+        control.setQuorum(quorum);
+        control.setVerificationMethod(verificationMethodIds);
+        treasuryAccount.setControl(control);
+        organizationDeclaration.setAccount(Arrays.asList(treasuryAccount));
 
         organizationDeclaration.setService(new ArrayList<Service>());
         addService(organizationDeclaration, 0, "https://node0.first-dial-validator.io/publisher",
