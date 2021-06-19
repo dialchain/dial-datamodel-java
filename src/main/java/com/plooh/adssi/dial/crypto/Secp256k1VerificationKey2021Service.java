@@ -9,21 +9,21 @@ import com.nimbusds.jose.jwk.KeyUse;
 
 import io.ipfs.multibase.Multibase;
 
-public class Spec256k1VerificationKey2021Service {
-    public static final String KEY_TYPE = "Spec256k1VerificationKey2021";
+public class Secp256k1VerificationKey2021Service {
+    public static final String KEY_TYPE = "Secp256k1VerificationKey2021";
 
-    private static final CommonECKeyService spec256k1 = new CommonECKeyService(Curve.SECP256K1, KeyUse.SIGNATURE);
+    private static final CommonECKeyService secp256k1 = new CommonECKeyService(Curve.SECP256K1, KeyUse.SIGNATURE);
 
     public static ECKey generateKeyPair(String keyID) {
-        return spec256k1.genKeyPair(keyID);
+        return secp256k1.genKeyPair(keyID);
     }
 
     public static String publicKeyMultibase(ECKey publicJWK) {
-        return spec256k1.publicKeyMultibase(publicJWK, Multibase.Base.Base58BTC);
+        return secp256k1.publicKeyMultibase(publicJWK, Multibase.Base.Base58BTC);
     }
 
     public static JWK publicKeyFromMultibase(String publicKeyMultibase, String keyID) {
-        return spec256k1.publicKeyFromMultibase(publicKeyMultibase, keyID);
+        return secp256k1.publicKeyFromMultibase(publicKeyMultibase, keyID);
     }
 
     public static List<ECKey> keyPairs(int qty, String did) {
@@ -31,7 +31,7 @@ public class Spec256k1VerificationKey2021Service {
     }
 
     public static List<ECKey> keyPairs(int qty, int startIndex, String did) {
-        return spec256k1.keyPairs(qty, startIndex, did, "#key-spec256k1-");
+        return secp256k1.keyPairs(qty, startIndex, did, "#key-secp256k1-");
     }
 
 }

@@ -1,7 +1,5 @@
 package com.plooh.adssi.dial.crypto;
 
-import java.security.interfaces.ECPublicKey;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
@@ -10,9 +8,9 @@ import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
 
-public class JcsBase64Spec256k1Signature2021Service extends JcsBase64EcSignature2021Service {
+public class JcsBase64Secp256k1Signature2021Service extends JcsBase64EcSignature2021Service {
 
-    static final String SIGNATURE_TYPE = "JcsBase64Spec256k1Signature2021";
+    static final String SIGNATURE_TYPE = "JcsBase64Secp256k1Signature2021";
 
     @Override
     public String signatureType() {

@@ -2,10 +2,13 @@ package com.plooh.adssi.dial.examples.validator;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.time.Instant;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.nimbusds.jose.JOSEException;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
 import com.plooh.adssi.dial.examples.participant.CreateParticipantDeclaration;
 import com.plooh.adssi.dial.examples.participant.NewParticipantDeclaration;
@@ -15,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 public class CreateValidatorDeclarationTest {
     @Test
-    void testHandle() throws JsonProcessingException {
+    void testHandle() throws JsonProcessingException, JOSEException, NoSuchAlgorithmException, NoSuchProviderException {
         CreateParticipantDeclaration createParticipantDeclaration = new CreateParticipantDeclaration();
         NewParticipantDeclaration participant0 = createParticipantDeclaration.handle(Instant.now());
         NewParticipantDeclaration participant1 = createParticipantDeclaration.handle(Instant.now());
