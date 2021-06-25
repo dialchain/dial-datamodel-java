@@ -10,13 +10,8 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.plooh.adssi.dial.crypto.BitcoinAddress;
 import com.plooh.adssi.dial.crypto.CryptoService;
-import com.plooh.adssi.dial.crypto.Ed25519VerificationKey2021Service;
-import com.plooh.adssi.dial.crypto.Secp256k1VerificationKey2021Service;
-import com.plooh.adssi.dial.data.AddressType;
 import com.plooh.adssi.dial.data.Declarations;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
 import com.plooh.adssi.dial.data.Proof;
@@ -24,7 +19,7 @@ import com.plooh.adssi.dial.data.ProofPurpose;
 import com.plooh.adssi.dial.data.SignatureAssertionMethod;
 import com.plooh.adssi.dial.data.TreasuryAccount;
 import com.plooh.adssi.dial.data.TreasuryAccountControler;
-import com.plooh.adssi.dial.data.VerificationMethod;
+import com.plooh.adssi.dial.examples.utils.VerificationMethodUtils;
 import com.plooh.adssi.dial.json.JSON;
 import com.plooh.adssi.dial.parser.TimeFormat;
 
@@ -40,22 +35,24 @@ public class CreateParticipantDeclaration {
             throws JsonProcessingException, JOSEException, NoSuchAlgorithmException, NoSuchProviderException {
         String creationDate = TimeFormat.DTF.format(dateTime);
         Declarations declarations = new Declarations();
-        declarations.setId(AddressType.uuid.normalize(UUID.randomUUID().toString()));
         declarations.setType("Declaration");
         declarations.setDeclaration(new ArrayList<>());
 
         ParticipantDeclaration participantDeclaration = new ParticipantDeclaration();
         declarations.getDeclaration().add(participantDeclaration);
         participantDeclaration.setCreated(creationDate);
-        String participantId = AddressType.uuid.normalize(UUID.randomUUID().toString());
+        // String participantId =
+        // AddressType.uuid.normalize(UUID.randomUUID().toString());
+
+        participantDeclaration.setVerificationMethod(new ArrayList<>());
+        VerificationMethodData verif_ed25519 = VerificationMethodUtils.verificationMethodEd25519(null, creationDate, 0);
+        participantDeclaration.getVerificationMethod().add(verif_ed25519.getVerificationMethod());
+        String participantId = verif_ed25519.getVerificationMethod().getPublicKeyMultibase();
         participantDeclaration.setId(participantId);
         participantDeclaration.setController(Arrays.asList(participantId));
 
-        participantDeclaration.setVerificationMethod(new ArrayList<>());
-        VerificationMethodData verif_ed25519 = verificationMethodEd25519(participantId, creationDate, 0);
-        participantDeclaration.getVerificationMethod().add(verif_ed25519.getVerificationMethod());
-
-        VerificationMethodData verif_secp2561 = verificationMethodSecp256k1(participantId, creationDate, 1);
+        VerificationMethodData verif_secp2561 = VerificationMethodUtils.verificationMethodSecp256k1(participantId,
+                creationDate, 1);
         participantDeclaration.getVerificationMethod().add(verif_secp2561.getVerificationMethod());
 
         SignatureAssertionMethod signatureAssertionMethod = new SignatureAssertionMethod(
@@ -76,7 +73,6 @@ public class CreateParticipantDeclaration {
         participantDeclaration.setAccount(Arrays.asList(treasuryAccount));
 
         Proof ed25519Proof = new Proof();
-        ed25519Proof.setDocument(declarations.getId());
         ed25519Proof.setIssuer(participantId);
         ed25519Proof.setProofPurpose(ProofPurpose.PoP.name());
         ed25519Proof.setVerificationMethod(verif_ed25519.getVerificationMethod().getId());
@@ -86,7 +82,6 @@ public class CreateParticipantDeclaration {
                 verif_ed25519.getKeyPair(), ed25519Proof);
 
         Proof secp256k1Proof = new Proof();
-        secp256k1Proof.setDocument(declarations.getId());
         secp256k1Proof.setIssuer(participantId);
         secp256k1Proof.setProofPurpose(ProofPurpose.PoP.name());
         secp256k1Proof.setVerificationMethod(verif_secp2561.getVerificationMethod().getId());
@@ -101,38 +96,5 @@ public class CreateParticipantDeclaration {
         result.getVerificationMethod().put(verif_secp2561.getId(), verif_secp2561);
 
         return result;
-    }
-
-    public VerificationMethodData verificationMethodEd25519(String participantId, String creationDate, int index) {
-        VerificationMethod verificationMethod = new VerificationMethod();
-        verificationMethod.setId(participantId + "#" + creationDate + "#key-" + index);
-        verificationMethod.setType(Ed25519VerificationKey2021Service.KEY_TYPE);
-        OctetKeyPair keyPair = Ed25519VerificationKey2021Service.generateKeyPair(verificationMethod.getId());
-        String publicKeyMultibase = Ed25519VerificationKey2021Service.publicKeyMultibase(keyPair.toPublicJWK());
-        verificationMethod.setPublicKeyMultibase(publicKeyMultibase);
-        return new VerificationMethodData(verificationMethod.getId(), keyPair, verificationMethod);
-    }
-
-    public VerificationMethodData verificationMethodSecp256k1(String participantId, String creationDate, int index) {
-        VerificationMethod verificationMethod = new VerificationMethod();
-        verificationMethod.setId(participantId + "#" + creationDate + "#key-" + index);
-        verificationMethod.setType(Secp256k1VerificationKey2021Service.KEY_TYPE);
-        ECKey keyPair = Secp256k1VerificationKey2021Service.generateKeyPair(verificationMethod.getId());
-        String publicKeyMultibase = Secp256k1VerificationKey2021Service.publicKeyMultibase(keyPair.toPublicJWK());
-        verificationMethod.setPublicKeyMultibase(publicKeyMultibase);
-        return new VerificationMethodData(verificationMethod.getId(), keyPair, verificationMethod);
-    }
-
-    static private String adjustTo64(String s) {
-        switch (s.length()) {
-            case 62:
-                return "00" + s;
-            case 63:
-                return "0" + s;
-            case 64:
-                return s;
-            default:
-                throw new IllegalArgumentException("not a valid key: " + s);
-        }
     }
 }

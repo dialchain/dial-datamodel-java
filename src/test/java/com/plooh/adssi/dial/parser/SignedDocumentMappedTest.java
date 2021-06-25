@@ -24,7 +24,6 @@ public class SignedDocumentMappedTest {
         SignedDocumentMapped sdm = new SignedDocumentMapped(input);
 
         Proof proof = new Proof();
-        proof.setDocument(sdm.id());
 
         sdm.addProof(proof);
         String json = sdm.toJson();

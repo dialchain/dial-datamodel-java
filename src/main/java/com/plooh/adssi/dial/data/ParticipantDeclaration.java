@@ -8,7 +8,6 @@ import lombok.Data;
 public class ParticipantDeclaration extends DIDeclaration {
     public static final String TYPE = "Participant";
 
-    private List<VerificationMethod> verificationMethod;
     private List<SignatureAssertionMethod> assertionMethod;
 
     public ParticipantDeclaration() {

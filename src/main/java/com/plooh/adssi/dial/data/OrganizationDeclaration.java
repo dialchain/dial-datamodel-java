@@ -3,8 +3,10 @@ package com.plooh.adssi.dial.data;
 import java.util.List;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class OrganizationDeclaration extends DIDeclaration {
     public static final String TYPE = "Organization";
 
@@ -15,5 +17,4 @@ public class OrganizationDeclaration extends DIDeclaration {
     public OrganizationDeclaration() {
         super(TYPE);
     }
-
 }
