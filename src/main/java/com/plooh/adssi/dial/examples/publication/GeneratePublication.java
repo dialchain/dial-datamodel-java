@@ -1,37 +1,30 @@
 package com.plooh.adssi.dial.examples.publication;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.plooh.adssi.dial.data.AddressType;
+import com.plooh.adssi.dial.cid.CidUtils;
 import com.plooh.adssi.dial.data.Publication;
-import com.plooh.adssi.dial.data.Twindow;
 import com.plooh.adssi.dial.json.JSON;
-import com.plooh.adssi.dial.twindow.TwindowUtils;
 
 public class GeneratePublication {
 
-    public String handle(Instant dateTime, String recordString) {
+    public String handle(Instant dateTime, String recordString, String orgRecordString) {
         try {
-            return handleInternal(dateTime, recordString);
-        } catch (JsonProcessingException e) {
+            return handleInternal(dateTime, recordString, orgRecordString);
+        } catch (JsonProcessingException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String handleInternal(Instant dateTime, String recordString)
-            throws JsonMappingException, JsonProcessingException {
+    private String handleInternal(Instant dateTime, String recordString, String orgRecordString)
+            throws JsonProcessingException, NoSuchAlgorithmException {
         Publication publication = new Publication();
-        JsonNode document = JSON.MAPPER.readTree(recordString);
-        publication.setDocument(document);
-        publication.setId(AddressType.uuid.normalize(UUID.randomUUID().toString()));
         publication.setType("Publication");
-
-        Twindow twindow = TwindowUtils.twindow(dateTime);
-        publication.setTwindow(twindow);
+        String jcsCidB58 = CidUtils.jcsCidB58(recordString);
+        publication.setCid(Arrays.asList(jcsCidB58));
 
         return JSON.MAPPER.writeValueAsString(publication);
     }

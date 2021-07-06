@@ -12,7 +12,6 @@ import lombok.Data;
  */
 @Data
 public class SignedDocument {
-    private String id;
     private List<Proof> proof;
     private String type;
 }

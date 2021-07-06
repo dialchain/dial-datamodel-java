@@ -32,16 +32,15 @@ public class SignValidatorDeclaration {
 
         SignatureAssertionMethod signatureAssertionmethod = memberParticipant.getParticipant().getAssertionMethod()
                 .get(0);
-        List<String> assertionMethods = Arrays.asList(voteAssertionMethod.getId(), signatureAssertionmethod.getId(),
-                signatureAssertionmethod.getVerificationMethod());
+        List<String> assertionMethods = Arrays.asList(voteAssertionMethod.getId(), signatureAssertionmethod.getId());
 
         VerificationMethodData verificationMethodData = participant.getVerificationMethod()
                 .get(signatureAssertionmethod.getVerificationMethod());
 
         Proof proof = new Proof();
-        proof.setDocument(orgRecord.id());
         proof.setIssuer(memberParticipant.getParticipant().getId());
         proof.setAssertionMethod(assertionMethods);
+        proof.setVerificationMethod(signatureAssertionmethod.getVerificationMethod());
         proof.setCreated(creationDate);
         proof.setNonce(UUID.randomUUID().toString());
         JcsBase64EcSignature2021Service signatureService = CryptoService

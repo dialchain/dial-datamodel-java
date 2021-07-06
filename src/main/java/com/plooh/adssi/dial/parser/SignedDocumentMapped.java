@@ -30,10 +30,6 @@ public class SignedDocumentMapped {
         }
     }
 
-    public String id() {
-        return doc.read("$.id", String.class);
-    }
-
     public String type() {
         return doc.read("$.type", String.class);
     }

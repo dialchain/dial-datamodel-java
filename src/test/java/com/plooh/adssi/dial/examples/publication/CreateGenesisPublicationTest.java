@@ -7,6 +7,7 @@ import java.security.NoSuchProviderException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.jose.JOSEException;
@@ -42,9 +43,9 @@ public class CreateGenesisPublicationTest {
         List<NewParticipantDeclaration> signers = Arrays.asList(participant1, participant2);
         List<String> records = Arrays.asList(participant0.getRecord(), participant1.getRecord(),
                 participant2.getRecord(), validatorRecordString);
-        List<String> genesisRecords = createGenesisPublication.handle(Instant.now(), validatorRecordString, records,
-                signers);
-        assertTrue(genesisRecords.size() == 4);
+        Map<String, String> genesisRecords = createGenesisPublication.handle(Instant.now(), validatorRecordString,
+                records, signers);
+        assertTrue(genesisRecords.size() == 8);
     }
 
     ParticipantDeclaration getParticipantDeclaration(String recordString) {
