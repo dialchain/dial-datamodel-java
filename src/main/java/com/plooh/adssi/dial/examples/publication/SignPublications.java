@@ -28,7 +28,7 @@ public class SignPublications {
 
     private String handleInternal(Instant dateTime, String publicationString, NewParticipantDeclaration participant,
             String orgRecordString) {
-        String creationDate = TimeFormat.DTF.format(dateTime);
+        String creationDate = TimeFormat.format(dateTime);
         OrganizationDeclarationMapped orgRecord = new OrganizationDeclarationMapped(orgRecordString);
         OrganizationDeclaration orgDeclaration = orgRecord.declarations().get(0);
 

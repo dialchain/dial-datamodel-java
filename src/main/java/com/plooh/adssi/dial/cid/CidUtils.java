@@ -14,7 +14,7 @@ public class CidUtils {
     private static MessageDigest hasher;
     static {
         try {
-            hasher = MessageDigest.getInstance("SHA-512");
+            hasher = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(e);
         }
@@ -24,7 +24,7 @@ public class CidUtils {
     public static String jcsCidB58(String fileContentUtf8) {
         String cannonicalString = JCS.encode(fileContentUtf8);
         byte[] hash = hasher.digest(cannonicalString.getBytes(StandardCharsets.UTF_8));
-        Cid cid = new Cid(1, Cid.Codec.Raw, Multihash.Type.sha2_512, hash);
-        return cid.toBase58();
+        Cid cid = new Cid(1, Cid.Codec.Raw, Multihash.Type.sha2_256, hash);
+        return cid.toString();
     }
 }

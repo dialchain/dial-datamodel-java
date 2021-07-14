@@ -35,7 +35,7 @@ import org.bitcoinj.params.MainNetParams;
 public class CreateValidatorDeclaration {
     public String handle(Instant dateTime, List<ParticipantDeclaration> nodes)
             throws JsonProcessingException, JOSEException {
-        String creationDate = TimeFormat.DTF.format(dateTime);
+        String creationDate = TimeFormat.format(dateTime);
         Declarations declarations = new Declarations();
         declarations.setType("Declaration");
         declarations.setDeclaration(new ArrayList<>());

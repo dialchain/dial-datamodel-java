@@ -49,7 +49,7 @@ public abstract class JcsBase64EcSignature2021Service {
 
         // Set date if missing
         if (proof.getCreated() == null) {
-            proof.setCreated(TimeFormat.DTF.format(Instant.now()));
+            proof.setCreated(TimeFormat.format(Instant.now()));
         }
 
         // If missing assertion method

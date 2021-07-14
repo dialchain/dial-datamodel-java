@@ -20,7 +20,7 @@ import com.plooh.adssi.dial.parser.TimeFormat;
 public class SignValidatorDeclaration {
 
     public String handle(Instant dateTime, String dialRecordString, NewParticipantDeclaration participant) {
-        String creationDate = TimeFormat.DTF.format(dateTime);
+        String creationDate = TimeFormat.format(dateTime);
         OrganizationDeclarationMapped orgRecord = new OrganizationDeclarationMapped(dialRecordString);
         OrganizationDeclaration orgDeclaration = orgRecord.declarations().get(0);
         VoteAssertionMethod voteAssertionMethod = orgDeclaration.getAssertionMethod().get(0);

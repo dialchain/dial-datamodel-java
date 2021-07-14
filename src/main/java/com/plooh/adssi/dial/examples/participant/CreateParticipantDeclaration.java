@@ -33,7 +33,7 @@ public class CreateParticipantDeclaration {
 
     public NewParticipantDeclaration handle(Instant dateTime)
             throws JsonProcessingException, JOSEException, NoSuchAlgorithmException, NoSuchProviderException {
-        String creationDate = TimeFormat.DTF.format(dateTime);
+        String creationDate = TimeFormat.format(dateTime);
         Declarations declarations = new Declarations();
         declarations.setType("Declaration");
         declarations.setDeclaration(new ArrayList<>());
