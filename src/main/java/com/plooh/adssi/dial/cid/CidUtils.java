@@ -1,5 +1,6 @@
 package com.plooh.adssi.dial.cid;
 
+import io.ipfs.multibase.Multibase;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,13 +19,20 @@ public class CidUtils {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(e);
         }
-
     }
 
     public static String jcsCidB58(String fileContentUtf8) {
         String cannonicalString = JCS.encode(fileContentUtf8);
         byte[] hash = hasher.digest(cannonicalString.getBytes(StandardCharsets.UTF_8));
-        Cid cid = new Cid(1, Cid.Codec.Raw, Multihash.Type.sha2_256, hash);
-        return cid.toString();
+        Cid cid = new Cid(1L, Cid.Codec.Raw, Multihash.Type.sha2_256, hash);
+        return Multibase.encode(Multibase.Base.Base58BTC, cid.toBytes());
     }
+
+    public static String jcsCidB32(String fileContentUtf8) {
+        String cannonicalString = JCS.encode(fileContentUtf8);
+        byte[] hash = hasher.digest(cannonicalString.getBytes(StandardCharsets.UTF_8));
+        Cid cid = new Cid(1L, Cid.Codec.Raw, Multihash.Type.sha2_256, hash);
+        return Multibase.encode(Multibase.Base.Base32, cid.toBytes());
+    }
+
 }
