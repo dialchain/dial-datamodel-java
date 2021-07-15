@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import com.plooh.adssi.dial.crypto.CommonECSignature2021Service;
 import com.plooh.adssi.dial.crypto.CryptoService;
-import com.plooh.adssi.dial.crypto.JcsBase64EcSignature2021Service;
 import com.plooh.adssi.dial.data.OrganizationDeclaration;
 import com.plooh.adssi.dial.data.Proof;
 import com.plooh.adssi.dial.data.SignatureAssertionMethod;
@@ -43,8 +43,9 @@ public class SignValidatorDeclaration {
         proof.setVerificationMethod(signatureAssertionmethod.getVerificationMethod());
         proof.setCreated(creationDate);
         proof.setNonce(UUID.randomUUID().toString());
-        JcsBase64EcSignature2021Service signatureService = CryptoService
+        CommonECSignature2021Service signatureService = CryptoService
                 .findSignatureServiceForKey(verificationMethodData.getVerificationMethod().getType());
-        return signatureService.sign(dialRecordString, verificationMethodData.getKeyPair(), proof);
+        return signatureService.signDeclaration(dialRecordString, proof, verificationMethodData.getKeyPair())
+                .getSignedRecord();
     }
 }

@@ -3,17 +3,16 @@ package com.plooh.adssi.dial.parser;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.nimbusds.jose.util.IOUtils;
 import com.plooh.adssi.dial.data.Proof;
 import com.plooh.adssi.dial.jcs.JCS;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 public class SignedDocumentMappedTest {
@@ -44,7 +43,7 @@ public class SignedDocumentMappedTest {
     }
 
     private String read(String path) throws IOException {
-        InputStream is = this.getClass().getResourceAsStream(path);
-        return IOUtils.readInputStreamToString(is, StandardCharsets.UTF_8);
+        // InputStream is = this.getClass().getResourceAsStream(path);
+        return IOUtils.resourceToString(path, StandardCharsets.UTF_8);
     }
 }
