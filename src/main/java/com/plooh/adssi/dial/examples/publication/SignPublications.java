@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import com.plooh.adssi.dial.crypto.CommonECSignature2021Service;
 import com.plooh.adssi.dial.crypto.CryptoService;
-import com.plooh.adssi.dial.crypto.JcsBase64EcSignature2021Service;
 import com.plooh.adssi.dial.data.OrganizationDeclaration;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
 import com.plooh.adssi.dial.data.Proof;
@@ -28,7 +28,7 @@ public class SignPublications {
 
     private String handleInternal(Instant dateTime, String publicationString, NewParticipantDeclaration participant,
             String orgRecordString) {
-        String creationDate = TimeFormat.DTF.format(dateTime);
+        String creationDate = TimeFormat.format(dateTime);
         OrganizationDeclarationMapped orgRecord = new OrganizationDeclarationMapped(orgRecordString);
         OrganizationDeclaration orgDeclaration = orgRecord.declarations().get(0);
 
@@ -52,8 +52,9 @@ public class SignPublications {
         proof.setCreated(creationDate);
         proof.setNonce(UUID.randomUUID().toString());
 
-        JcsBase64EcSignature2021Service signatureService = CryptoService
+        CommonECSignature2021Service signatureService = CryptoService
                 .findSignatureServiceForKey(verificationMethodData.getVerificationMethod().getType());
-        return signatureService.sign(publicationString, verificationMethodData.getKeyPair(), proof);
+        return signatureService.signDeclaration(publicationString, proof, verificationMethodData.getKeyPair())
+                .getSignedRecord();
     }
 }

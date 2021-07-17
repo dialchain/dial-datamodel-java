@@ -1,6 +1,5 @@
 package com.plooh.adssi.dial.examples.validator;
 
-import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,12 +7,11 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.JWK;
 import com.plooh.adssi.dial.crypto.BitcoinAddress;
 import com.plooh.adssi.dial.crypto.CommonCurveKeyService;
 import com.plooh.adssi.dial.crypto.CryptoService;
 import com.plooh.adssi.dial.data.Declarations;
+import com.plooh.adssi.dial.data.EncodedECPublicKey;
 import com.plooh.adssi.dial.data.OrganizationDeclaration;
 import com.plooh.adssi.dial.data.OrganizationMember;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
@@ -33,9 +31,9 @@ import com.plooh.adssi.dial.parser.TimeFormat;
 import org.bitcoinj.params.MainNetParams;
 
 public class CreateValidatorDeclaration {
-    public String handle(Instant dateTime, List<ParticipantDeclaration> nodes)
-            throws JsonProcessingException, JOSEException {
-        String creationDate = TimeFormat.DTF.format(dateTime);
+    public String handle(Instant dateTime, List<ParticipantDeclaration> nodes) throws JsonProcessingException {
+        String creationDate = TimeFormat.format(dateTime);
+
         Declarations declarations = new Declarations();
         declarations.setType("Declaration");
         declarations.setDeclaration(new ArrayList<>());
@@ -64,16 +62,16 @@ public class CreateValidatorDeclaration {
         organizationDeclaration.setAssertionMethod(Arrays.asList(voteAssertionMethod));
 
         TreasuryAccount treasuryAccount = new TreasuryAccount();
-        final List<ECPublicKey> ecPublicKeys = new ArrayList<>();
+        final List<EncodedECPublicKey> ecPublicKeys = new ArrayList<>();
         final List<String> verificationMethodIds = new ArrayList<>();
         for (ParticipantDeclaration pd : nodes) {
             VerificationMethod verificationMethod = pd.getVerificationMethod().stream()
                     .filter(vm -> vm.getType().equals("Secp256k1VerificationKey2021")).findAny().get();
             verificationMethodIds.add(verificationMethod.getId());
             CommonCurveKeyService keyService = CryptoService.findKeyService(verificationMethod.getType());
-            JWK publicJWK = keyService.publicKeyFromMultibase(verificationMethod.getPublicKeyMultibase(),
+            EncodedECPublicKey publicKey = keyService.publicKeyFromMultibase(verificationMethod.getPublicKeyMultibase(),
                     verificationMethod.getId());
-            ecPublicKeys.add(publicJWK.toECKey().toECPublicKey());
+            ecPublicKeys.add(publicKey);
         }
         int quorum = (ecPublicKeys.size() / 2) + 1;
 
@@ -102,8 +100,9 @@ public class CreateValidatorDeclaration {
         ed25519Proof.setVerificationMethod(verif_ed25519.getVerificationMethod().getId());
         ed25519Proof.setCreated(creationDate);
         ed25519Proof.setNonce(UUID.randomUUID().toString());
-        String signedRecord = CryptoService.ed25519SignatureService.sign(JSON.MAPPER.writeValueAsString(declarations),
-                verif_ed25519.getKeyPair(), ed25519Proof);
+        String signedRecord = CryptoService.ed25519SignatureService
+                .signDeclaration(JSON.MAPPER.writeValueAsString(declarations), ed25519Proof, verif_ed25519.getKeyPair())
+                .getSignedRecord();
 
         return signedRecord;
     }

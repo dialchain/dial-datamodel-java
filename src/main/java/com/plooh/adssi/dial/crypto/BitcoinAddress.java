@@ -1,9 +1,9 @@
 package com.plooh.adssi.dial.crypto;
 
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECPoint;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.plooh.adssi.dial.data.EncodedECPublicKey;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
@@ -30,11 +30,11 @@ public class BitcoinAddress {
                 CURVE_PARAMS.getH());
     }
 
-    public static String p2wpkhAddress(NetworkParameters params, ECPublicKey ecPublicKey) {
+    public static String p2wpkhAddress(NetworkParameters params, EncodedECPublicKey ecPublicKey) {
         return Address.fromKey(params, toEcKey(ecPublicKey), ScriptType.P2WPKH).toString();
     }
 
-    public static String p2shAddress(NetworkParameters params, int threshold, List<ECPublicKey> ecPublicKeys) {
+    public static String p2shAddress(NetworkParameters params, int threshold, List<EncodedECPublicKey> ecPublicKeys) {
         List<ECKey> keys = ecPublicKeys.stream().map(ecPublicKey -> toEcKey(ecPublicKey)).collect(Collectors.toList());
         Script redeemScript = ScriptBuilder.createRedeemScript(threshold, keys);
         Script script = ScriptBuilder.createP2SHOutputScript(redeemScript);
@@ -42,9 +42,8 @@ public class BitcoinAddress {
         return multisig.toString();
     }
 
-    private static ECKey toEcKey(ECPublicKey ecPublicKey) {
-        ECPoint point = ecPublicKey.getW();
-        return ECKey.fromPublicOnly(CURVE.getCurve().createPoint(point.getAffineX(), point.getAffineY()), true);
+    private static ECKey toEcKey(EncodedECPublicKey ecPublicKey) {
+        return ECKey.fromPublicOnly(ecPublicKey.getBytes());
     }
 
 }

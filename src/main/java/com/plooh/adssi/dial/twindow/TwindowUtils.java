@@ -1,13 +1,12 @@
 package com.plooh.adssi.dial.twindow;
 
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import com.plooh.adssi.dial.data.Twindow;
+import com.plooh.adssi.dial.parser.TimeFormat;
 
 public class TwindowUtils {
-    public static final DateTimeFormatter DTF = DateTimeFormatter.ISO_INSTANT;
 
     public static final Twindow twindow(Instant now, String antecedentHash, String antecedentClosing) {
         Twindow twindow = twindow(now);
@@ -19,8 +18,8 @@ public class TwindowUtils {
     public static final Twindow twindow(Instant now) {
         Instant start = now.truncatedTo(ChronoUnit.DAYS);
         Instant end = start.plus(1, ChronoUnit.DAYS);
-        String startFormated = TwindowUtils.DTF.format(start);
-        String endFormated = TwindowUtils.DTF.format(end);
+        String startFormated = TimeFormat.format(start);
+        String endFormated = TimeFormat.format(end);
 
         Twindow twindow = new Twindow();
         twindow.setStart(startFormated);
@@ -38,7 +37,7 @@ public class TwindowUtils {
 
     public static final Twindow antecedantTwindow(String antecedantClosing) {
         Instant start = Instant.parse(antecedantClosing).minus(1, ChronoUnit.DAYS);
-        String startFormated = TwindowUtils.DTF.format(start);
+        String startFormated = TimeFormat.format(start);
         Twindow twindow = new Twindow();
         twindow.setStart(startFormated);
         twindow.setEnd(antecedantClosing);

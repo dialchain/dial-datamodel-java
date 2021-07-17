@@ -2,13 +2,13 @@ package com.plooh.adssi.dial.examples.participant;
 
 import java.util.List;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.plooh.adssi.dial.crypto.CommonCurveKeyService;
+import com.plooh.adssi.dial.crypto.CommonECSignature2021Service;
 import com.plooh.adssi.dial.crypto.CryptoService;
-import com.plooh.adssi.dial.crypto.JcsBase64EcSignature2021Service;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
 import com.plooh.adssi.dial.data.Proof;
+import com.plooh.adssi.dial.data.ValidationResult;
 import com.plooh.adssi.dial.data.VerificationMethod;
+import com.plooh.adssi.dial.lookup.SinglePublicKeyResolver;
 import com.plooh.adssi.dial.parser.ParticipantDeclarationMapped;
 
 public class VerifyParticipantDeclaration {
@@ -25,14 +25,11 @@ public class VerifyParticipantDeclaration {
                     .findFirst().orElseThrow(() -> new IllegalStateException(
                             "Invalid record. Missing proof for declared verification method"));
 
-            CommonCurveKeyService keyService = CryptoService.findKeyService(verificationMethod.getType());
-            JWK publicJWK = keyService.publicKeyFromMultibase(verificationMethod.getPublicKeyMultibase(),
-                    verificationMethod.getId());
-            JcsBase64EcSignature2021Service verifService = CryptoService.findSignatureService(proof.getType());
-            boolean verified = verifService.verify(dialRecordString, publicJWK, proof);
-            if (!verified)
-                throw new IllegalStateException(
-                        "Could not verify proof for verification method with id " + verificationMethod.getId());
+            CommonECSignature2021Service verifService = CryptoService.findSignatureService(proof.getType());
+            List<ValidationResult> resultList = verifService.verifyDeclaration(dialRecordString, proof,
+                    new SinglePublicKeyResolver(verificationMethod));
+            if (!resultList.isEmpty())
+                throw new IllegalStateException("Could not verify proof " + resultList);
         }
         return true;
     }

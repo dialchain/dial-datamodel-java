@@ -2,36 +2,47 @@ package com.plooh.adssi.dial.crypto;
 
 import java.util.List;
 
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.KeyUse;
+import com.plooh.adssi.dial.data.ECKeyPair;
+import com.plooh.adssi.dial.data.ECPublicKey;
+import com.plooh.adssi.dial.encode.Base64URL;
 
-import io.ipfs.multibase.Multibase;
+import org.bitcoinj.core.ECKey;
 
-public class Secp256k1VerificationKey2021Service {
-    public static final String KEY_TYPE = "Secp256k1VerificationKey2021";
+public class Secp256k1VerificationKey2021Service extends CommonCurveKeyService<ECKeyPair, ECPublicKey> {
+    public static final String KEY_ID_SUFFIX = "key-Secp256k1-";
+    public static final String VERIFICATION_METHOD_TYPE = "Secp256k1VerificationKey2021";
+    public static final String CURVE = "secp256k1";
+    public static final String KEY_USE = "sig";
 
-    private static final CommonECKeyService secp256k1 = new CommonECKeyService(Curve.SECP256K1, KeyUse.SIGNATURE);
+    public static final Secp256k1VerificationKey2021Service instance = new Secp256k1VerificationKey2021Service();
 
-    public static ECKey generateKeyPair(String keyID) {
-        return secp256k1.genKeyPair(keyID);
+    private Secp256k1VerificationKey2021Service() {
     }
 
-    public static String publicKeyMultibase(ECKey publicJWK) {
-        return secp256k1.publicKeyMultibase(publicJWK, Multibase.Base.Base58BTC);
+    @Override
+    public ECKeyPair genKeyPair(String keyID) {
+        ECKey privateKey = new ECKey();
+        ECPublicKey ecPublicKey = ECPublicKey.builder().curve("secp256k1").kid(keyID).keyUse("sig")
+                .w(Base64URL.encode_base64Url_utf8_nopad(privateKey.getPubKey())).build();
+        return ECKeyPair.builder().d(Base64URL.encode_base64Url_utf8_nopad(privateKey.getPrivKeyBytes()))
+                .publicKey(ecPublicKey).build();
     }
 
-    public static JWK publicKeyFromMultibase(String publicKeyMultibase, String keyID) {
-        return secp256k1.publicKeyFromMultibase(publicKeyMultibase, keyID);
-    }
-
-    public static List<ECKey> keyPairs(int qty, String did) {
+    public List<ECKeyPair> keyPairs(int qty, String did) {
         return keyPairs(qty, 0, did);
     }
 
-    public static List<ECKey> keyPairs(int qty, int startIndex, String did) {
-        return secp256k1.keyPairs(qty, startIndex, did, "#key-secp256k1-");
+    public List<ECKeyPair> keyPairs(int qty, int startIndex, String did) {
+        return keyPairs(qty, startIndex, did, KEY_ID_SUFFIX);
     }
 
+    @Override
+    protected byte[] getPublicKeyBytes(ECPublicKey publicKey) {
+        return Base64URL.decode_pad_utf8_base64Url(publicKey.getW());
+    }
+
+    @Override
+    protected byte[] getPrivateKeyBytes(ECKeyPair privateKey) {
+        return Base64URL.decode_pad_utf8_base64Url(privateKey.getD());
+    }
 }
