@@ -1,0 +1,32 @@
+{
+    "ed25519": {
+        "publicKey": {
+            "kid": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-Ed25519-0",
+            "x": "WtfgtZh-zaOlhYleqcGzwr3xNEcDYZvl7oTY_Fq4s3g",
+            "curve": "ed25519",
+            "keyUse": "sig",
+            "kty": "OKP"
+        },
+        "d": "hKomePM8Mlce-sgJ7l2saq9RkCQL7LjLflfzN92kYrs"
+    },
+    "secp256k1": {
+        "publicKey": {
+            "kid": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-Secp256k1-1",
+            "w": "AzxYgoP94u0kFSQG0Ls3baPVhpJl4MXWoI3dFisWZ-X_",
+            "curve": "secp256k1",
+            "keyUse": "sig",
+            "kty": "EC"
+        },
+        "d": "y-9bW00A4KMPjVQ-40Zc_2NH0ItZe4nuSIi5vunUP1c"
+    },
+    "x25519": {
+        "publicKey": {
+            "kid": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-X25519-0",
+            "x": "RHU0QSWW2KfEbWqav6Jmpqj_7UyEen6rgq7R-J91aCw",
+            "curve": "x25519",
+            "keyUse": "enc",
+            "kty": "OKP"
+        },
+        "d": "wHwbKGl9sEsSLGlneWUM3gXblLNi6QsbEOXc2CftfkU"
+    }
+}

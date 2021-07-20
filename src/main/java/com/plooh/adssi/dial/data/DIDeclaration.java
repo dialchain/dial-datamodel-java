@@ -15,6 +15,7 @@ public abstract class DIDeclaration extends Declaration {
     private List<String> controller;
     private List<TreasuryAccount> account;
     private List<VerificationMethod> verificationMethod;
+    private List<KeyAgreement> keyAgreement;
 
     public DIDeclaration(String type) {
         super(type);
