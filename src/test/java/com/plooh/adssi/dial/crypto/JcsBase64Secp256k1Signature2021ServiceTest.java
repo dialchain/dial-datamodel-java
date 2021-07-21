@@ -2,8 +2,6 @@ package com.plooh.adssi.dial.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plooh.adssi.dial.ReadFileUtils;
 import com.plooh.adssi.dial.data.ECKeyPair;

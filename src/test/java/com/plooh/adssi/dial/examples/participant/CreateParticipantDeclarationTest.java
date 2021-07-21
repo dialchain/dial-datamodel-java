@@ -23,8 +23,8 @@ public class CreateParticipantDeclarationTest {
 
     @Test
     void testVerifyStaticDeclaration() throws IOException {
-        String participantRecord = ReadFileUtils
-                .readString("./src/test/resources/test-data/z3F3P8rTpf8vP2zGv6BWqtrCNrW4WG3rQzYXBAv22ZXtm-did.json");
+        String participantRecord = ReadFileUtils.readString(
+                "./src/test/resources/java-test-data/z3F3P8rTpf8vP2zGv6BWqtrCNrW4WG3rQzYXBAv22ZXtm-did.json");
         VerifyParticipantDeclaration verifyParticipantDeclaration = new VerifyParticipantDeclaration();
 
         boolean verified = verifyParticipantDeclaration.handle(participantRecord);
