@@ -1,6 +1,5 @@
 package com.plooh.adssi.dial.examples.participant;
 
-import java.security.Security;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,12 +20,8 @@ import com.plooh.adssi.dial.json.JSON;
 import com.plooh.adssi.dial.parser.TimeFormat;
 
 import org.bitcoinj.params.MainNetParams;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CreateParticipantDeclaration {
-    static {
-        Security.addProvider(new BouncyCastleProvider());
-    }
 
     public NewParticipantDeclaration handle(Instant dateTime) throws JsonProcessingException {
         String creationDate = TimeFormat.format(dateTime);

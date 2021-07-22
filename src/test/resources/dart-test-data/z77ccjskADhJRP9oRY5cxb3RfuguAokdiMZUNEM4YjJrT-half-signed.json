@@ -1,0 +1,65 @@
+{
+    "declaration": [
+        {
+            "type": "Participant",
+            "id": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT",
+            "created": "2021-07-20T17:34:16.000Z",
+            "controller": [
+                "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT"
+            ],
+            "account": [
+                {
+                    "network": "org.bitcoin.production",
+                    "address": "bc1q6xzx44pmsr4gd8yfawhnxvr3kvnv55me8sx5x7",
+                    "control": {
+                        "quorum": 1,
+                        "verificationMethod": [
+                            "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-Secp256k1-1"
+                        ]
+                    }
+                }
+            ],
+            "verificationMethod": [
+                {
+                    "type": "Ed25519VerificationKey2021",
+                    "id": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-Ed25519-0",
+                    "publicKeyMultibase": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT"
+                },
+                {
+                    "type": "Secp2561k1VerificationKey2021",
+                    "id": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-Secp256k1-1",
+                    "publicKeyMultibase": "zxkWrS69UTitJVwtFDxRDd6UMHYnrQhMnvsxC92JKnq1x"
+                }
+            ],
+            "keyAgreement": [
+                {
+                    "type": "X25519KeyAgreementKey2021",
+                    "id": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-X25519-0",
+                    "publicKeyMultibase": "z5cEP1BdR5YK9KygPnbZYcDDBo4HnctWBDCJQMFR9SYyy"
+                }
+            ],
+            "assertionMethod": [
+                {
+                    "type": "Signature",
+                    "id": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#am--0",
+                    "verificationMethod": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-Ed25519-0"
+                }
+            ]
+        }
+    ],
+    "type": "Declaration",
+    "proof": [
+        {
+            "issuer": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT",
+            "created": "2021-07-20T17:34:16.000Z",
+            "proofPurpose": "PoP",
+            "type": "JcsBase64Ed25519Signature2021",
+            "assertionMethod": [
+                "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#am--0"
+            ],
+            "verificationMethod": "z77ccjskADhJRP9oRY5cxb3RfuguAokdiMZUNEM4YjJrT#2021-07-20T17:34:16.000Z#key-Ed25519-0",
+            "signatureValue": "I9_wQhbE7freIt-g5GfuLo0FrDGHWgY3G02SaJV60XbWD80NxHp6c7NoOwCQIU8Bk_ubGqD2-6w4bNc3svwmCQ",
+            "nonce": "8c888851-5afe-4968-80a1-38b164bafc0d"
+        }
+    ]
+}

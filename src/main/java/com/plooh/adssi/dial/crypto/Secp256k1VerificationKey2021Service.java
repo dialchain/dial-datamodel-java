@@ -1,5 +1,6 @@
 package com.plooh.adssi.dial.crypto;
 
+import java.security.Security;
 import java.util.List;
 
 import com.plooh.adssi.dial.data.ECKeyPair;
@@ -7,6 +8,7 @@ import com.plooh.adssi.dial.data.ECPublicKey;
 import com.plooh.adssi.dial.encode.Base64URL;
 
 import org.bitcoinj.core.ECKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class Secp256k1VerificationKey2021Service extends CommonCurveKeyService<ECKeyPair, ECPublicKey> {
     public static final String KEY_ID_SUFFIX = "key-Secp256k1-";
@@ -15,6 +17,10 @@ public class Secp256k1VerificationKey2021Service extends CommonCurveKeyService<E
     public static final String KEY_USE = "sig";
 
     public static final Secp256k1VerificationKey2021Service instance = new Secp256k1VerificationKey2021Service();
+    public static final BouncyCastleProvider bcProv = new BouncyCastleProvider();
+    static {
+        Security.addProvider(bcProv);
+    }
 
     private Secp256k1VerificationKey2021Service() {
     }
