@@ -3,7 +3,6 @@ package com.plooh.adssi.dial.crypto;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,16 +73,18 @@ public abstract class CommonECSignature2021Service {
         // Validate and isolate the signature value.
         final String signatureBe64URL = proof.getSignatureValue();
         if (signatureBe64URL == null) {
-            result.add(new ValidationResult(DIAL_001_002_003_signature_missing_signature_value_in_proof,
-                    Collections.singletonMap("proof", proof)));
+            result.add(ValidationResult.builder()
+                .key(DIAL_001_002_003_signature_missing_signature_value_in_proof)
+                .details(Collections.singletonMap("proof", proof)).build());
             return result;
         }
 
         // Resolve the verification method associated with this proof
         final VerificationMethod verificationMethod = publicKeyResolver.lookup(proof);
         if (verificationMethod == null) {
-            result.add(new ValidationResult(DIAL_001_002_002_signature_lookup_verificationMethod_failed,
-                    Collections.singletonMap("proof", proof)));
+            result.add(ValidationResult.builder()
+                    .key(DIAL_001_002_002_signature_lookup_verificationMethod_failed)
+                    .details(Collections.singletonMap("proof", proof)).build());
             return result;
         }
 
@@ -101,11 +102,11 @@ public abstract class CommonECSignature2021Service {
         final boolean verified = verifySignature(verificationMethod, jcs_utf8_base64urlHeader, jcs_utf8_base64urlData,
                 signatureBe64URL);
 
-        if (verified != true) {
-            Map<String, Object> hashMap = new HashMap<>();
-            hashMap.put("proof", proof);
-            hashMap.put("verificationMethod", verificationMethod);
-            result.add(new ValidationResult(DIAL_001_002_001_signature_invalid, hashMap));
+        if ( !verified ) {
+            result.add(ValidationResult.builder()
+                .key(DIAL_001_002_001_signature_invalid)
+                .details(Map.of("proof", proof, "verificationMethod", verificationMethod))
+                .build());
         }
 
         return result;
