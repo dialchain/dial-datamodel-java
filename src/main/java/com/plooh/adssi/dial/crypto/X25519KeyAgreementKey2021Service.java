@@ -56,4 +56,8 @@ public class X25519KeyAgreementKey2021Service extends CommonCurveKeyService<Octe
     protected byte[] getPrivateKeyBytes(OctetKeyPair privateKey) {
         return Base64URL.decode_pad_utf8_base64Url(privateKey.getD());
     }
+
+    public byte[] publicKeyFromBase64Url(String publicKey64Url) {
+        return Base64URL.decode_pad_utf8_base64Url(publicKey64Url);
+    }
 }
