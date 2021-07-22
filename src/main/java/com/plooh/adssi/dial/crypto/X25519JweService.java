@@ -41,7 +41,7 @@ public class X25519JweService {
     static final int secretKeyLength = 32;
 
     public String jweEncrypt(final byte[] clearText, final OctetPublicKey octetPublicKey) {
-        if (_curve != octetPublicKey.getCurve()) {
+        if (!_curve.equals(octetPublicKey.getCurve())) {
             throw new IllegalArgumentException("X25519Encrypter only supports OctetKeyPairs with crv=X25519");
         }
 
@@ -66,9 +66,9 @@ public class X25519JweService {
     byte[] jweDecrypt(final String jweString, final KeySource keySource) {
         final String[] jweParts = _parseJWE(jweString);
         final String headerJcs64Url = jweParts[0];
-        final String nonce64Url = jweParts[2];
-        final String cipherText64Url = jweParts[3];
-        final String authTag64Url = jweParts[4];
+        final String nonce64Url = jweParts[1];
+        final String cipherText64Url = jweParts[2];
+        final String authTag64Url = jweParts[3];
         try {
             return _jweDecrypt(headerJcs64Url, nonce64Url, cipherText64Url, authTag64Url, keySource);
         } catch (IOException | GeneralSecurityException e) {
@@ -112,14 +112,15 @@ public class X25519JweService {
         ephemeralPublicKeyJWK.put("crv", "X25519");
         ephemeralPublicKeyJWK.put("x", ephemeralOctetPublicKey.getX());
         // Add the ephemeral public EC key to the header
-        header.put("epk", ephemeralPublicKeyJWK);
+        final Map<String, Object> newHeader = new HashMap<>(header);
+        newHeader.put("epk", ephemeralPublicKeyJWK);
         // CryptoService.x25519KeyService.getPublicKeyBytes(publicKey)
         // final publicKey = x25519KeyService.toPublicKey(octetPublicKey);
         // Derive "Z"
         final byte[] sharedSecret = X25519.computeSharedSecret(
                 CryptoService.x25519KeyService.getPrivateKeyBytes(ephemeralKeyPair),
                 CryptoService.x25519KeyService.getPublicKeyBytes(octetPublicKey));
-        return _encryptWithSharedSecret(header, sharedSecret, clearText);
+        return _encryptWithSharedSecret(newHeader, sharedSecret, clearText);
     }
 
     /// Encrypts the specified plaintext using the specified shared secret
@@ -164,8 +165,8 @@ public class X25519JweService {
 
         // X25519 no encrypted key as encryption key is derived. So position
         // JWE will look like: header..nonce.cipherText.authTag
-        return Map.of("header_key", jcs_utf8_base64urlHeader, "nonce_key", Base64URL.encode_base64Url_utf8_nopad(nonce),
-                "cipherText_key", Base64URL.encode_base64Url_utf8_nopad(cipherBytes), "authTag_key",
+        return Map.of(header_key, jcs_utf8_base64urlHeader, nonce_key, Base64URL.encode_base64Url_utf8_nopad(nonce),
+                cipherText_key, Base64URL.encode_base64Url_utf8_nopad(cipherBytes), authTag_key,
                 Base64URL.encode_base64Url_utf8_nopad(mac));
     }
 
