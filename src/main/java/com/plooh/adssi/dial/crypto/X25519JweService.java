@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -12,7 +11,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.crypto.tink.subtle.AesCtrJceCipher;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.crypto.tink.subtle.X25519;
 import com.plooh.adssi.dial.data.OctetKeyPair;
@@ -23,12 +21,11 @@ import com.plooh.adssi.dial.json.JSON;
 import com.plooh.adssi.dial.key.KeySource;
 
 import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.GCMBlockCipher;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
-
-// final cypher = DartAesCbc(macAlgorithm: DartHmac(sha256));
-// final _cypher=DartAesCtr(macAlgorithm:DartHmac(sha256));
 
 public class X25519JweService {
     static final String _curve = "x25519";
@@ -49,7 +46,8 @@ public class X25519JweService {
         Map<String, String> jweParts;
         try {
             jweParts = _jweEncrypt(clearText, header, octetPublicKey);
-        } catch (JsonProcessingException | GeneralSecurityException e) {
+        } catch (JsonProcessingException | GeneralSecurityException | IllegalStateException
+                | InvalidCipherTextException e) {
             throw new RuntimeException(e);
         }
 
@@ -63,7 +61,7 @@ public class X25519JweService {
         return headerPart + ".." + noncePart + "." + cipherTextPart + "." + authTagPart;
     }
 
-    byte[] jweDecrypt(final String jweString, final KeySource keySource) {
+    public byte[] jweDecrypt(final String jweString, final KeySource keySource) {
         final String[] jweParts = _parseJWE(jweString);
         final String headerJcs64Url = jweParts[0];
         final String nonce64Url = jweParts[1];
@@ -71,16 +69,16 @@ public class X25519JweService {
         final String authTag64Url = jweParts[3];
         try {
             return _jweDecrypt(headerJcs64Url, nonce64Url, cipherText64Url, authTag64Url, keySource);
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (IOException | GeneralSecurityException | IllegalStateException | InvalidCipherTextException e) {
             throw new RuntimeException(e);
         }
     }
 
-    String[] _parseJWE(final String jweString) {
+    private String[] _parseJWE(final String jweString) {
         return StringUtils.split(jweString, ".");
     }
 
-    JsonNode parseHeader(final String jweString) {
+    public JsonNode parseHeader(final String jweString) {
         try {
             return JSON.MAPPER.readTree(Base64URL.decode_pad_utf8_base64Url(_parseJWE(jweString)[0]));
         } catch (IOException e) {
@@ -88,21 +86,13 @@ public class X25519JweService {
         }
     }
 
-    String parseNonce(final String jweString) {
-        return _parseJWE(jweString)[2];
-    }
-
-    static Map<String, Object> _jweHeader(final String kid) {
+    private static Map<String, Object> _jweHeader(final String kid) {
         return Map.of("alg", "ECDH-ES", "enc", "A256GCM-HS256", "kid", kid);
-        // final Map<String, Object> jweHeader = new HashMap<>();
-        // jweHeader.put("alg", "ECDH-ES");
-        // jweHeader.put("enc", "A256GCM-HS256");
-        // jweHeader.put("kid", kid);
-        // return jweHeader;
     }
 
-    static Map<String, String> _jweEncrypt(final byte[] clearText, final Map<String, Object> header,
-            final OctetPublicKey octetPublicKey) throws JsonProcessingException, GeneralSecurityException {
+    private static Map<String, String> _jweEncrypt(final byte[] clearText, final Map<String, Object> header,
+            final OctetPublicKey octetPublicKey) throws JsonProcessingException, GeneralSecurityException,
+            IllegalStateException, InvalidCipherTextException {
         // Generate ephemeral X25519 key pair
         final String ephemeralKid = UUID.randomUUID().toString();
         final OctetKeyPair ephemeralKeyPair = CryptoService.x25519KeyService.genKeyPair(ephemeralKid);
@@ -127,8 +117,9 @@ public class X25519JweService {
     /// ("Z") and, if provided, the content encryption key (CEK).
     /// Implementation foccussed on "alg": "ECDH-ES", and "enc": "A128CBC-HS256",
     /// Direct Encryption
-    static Map<String, String> _encryptWithSharedSecret(final Map<String, Object> header, final byte[] sharedSecret,
-            final byte[] clearText) throws JsonProcessingException, GeneralSecurityException {
+    private static Map<String, String> _encryptWithSharedSecret(final Map<String, Object> header,
+            final byte[] sharedSecret, final byte[] clearText) throws JsonProcessingException, GeneralSecurityException,
+            IllegalStateException, InvalidCipherTextException {
         // Derive shared key
 
         final byte[] nonce = new byte[12];
@@ -139,30 +130,32 @@ public class X25519JweService {
         return _auhtEncryptJWE(header, clearText, cek, nonce);
     }
 
-    static byte[] _deriveSharedKey(final byte[] sharedSecret, final byte[] nonce) throws GeneralSecurityException {
+    private static byte[] _deriveSharedKey(final byte[] sharedSecret, final byte[] nonce)
+            throws GeneralSecurityException {
         // share secret derived using hkdf with a 96 bits nonce.
         // only direct mode (No Key wrapping)
         return Hkdf.computeHkdf("HMACSHA256", sharedSecret, nonce, null, 32);
     }
 
-    static Map<String, String> _auhtEncryptJWE(final Map<String, Object> header, final byte[] clearText,
-            final byte[] cek, byte[] nonce) throws GeneralSecurityException, JsonProcessingException {
+    private static Map<String, String> _auhtEncryptJWE(final Map<String, Object> header, final byte[] clearText,
+            final byte[] cek, byte[] nonce)
+            throws JsonProcessingException, IllegalStateException, InvalidCipherTextException {
         // BASE64URL-encoded JWE header.
         final String jcs_utf8_base64urlHeader = Base64URL.encode_base64Url_utf8_nopad(
                 (JCS.encode(JSON.MAPPER.writeValueAsString(header))).getBytes(StandardCharsets.UTF_8));
         // Computes the Additional Authenticated Data (AAD) for the specified
-        // final byte[] aad =
-        // jcs_utf8_base64urlHeader.getBytes(StandardCharsets.US_ASCII);
+        final byte[] aad = jcs_utf8_base64urlHeader.getBytes(StandardCharsets.US_ASCII);
 
         // Encrypt the plain text according to the JWE ENC
         // 16 bytes iv size (128 bits standard)
-        AesCtrJceCipher _cypher = new AesCtrJceCipher(cek, 16);
-        byte[] cipherBytes = _cypher.encrypt(clearText);
-        // final secretBox = _cypher.encrypt(clearText, secretKey: cek, nonce: nonce);
-        // //, aad: aad);
-
-        byte[] mac = _mac(cek, clearText);
-
+        final GCMBlockCipher _cypher = new GCMBlockCipher(new AESEngine());
+        _cypher.init(true, new AEADParameters(new KeyParameter(cek), 128, nonce, aad));
+        // Canonicalization good for innteroperability. We enforce json
+        // base64Url hids special characters.
+        // ascii takes base64 bytes to encryption safe bytes.
+        final byte[] cipherBytesWMac = process(_cypher, clearText);
+        final byte[] mac = _cypher.getMac();
+        final byte[] cipherBytes = removeMac(cipherBytesWMac, mac);
         // X25519 no encrypted key as encryption key is derived. So position
         // JWE will look like: header..nonce.cipherText.authTag
         return Map.of(header_key, jcs_utf8_base64urlHeader, nonce_key, Base64URL.encode_base64Url_utf8_nopad(nonce),
@@ -170,17 +163,9 @@ public class X25519JweService {
                 Base64URL.encode_base64Url_utf8_nopad(mac));
     }
 
-    static byte[] _mac(byte[] key, byte[] content) {
-        HMac hmac = new HMac(new SHA256Digest());
-        hmac.init(new KeyParameter(key));
-        hmac.update(content, 0, content.length);
-        byte[] mac = new byte[hmac.getMacSize()];
-        int len = hmac.doFinal(mac, 0);
-        return mac;
-    }
-
     static byte[] _jweDecrypt(final String headerJcs64Url, final String nonce64Url, final String cipherText64Url,
-            final String authTag64Url, KeySource keySource) throws IOException, GeneralSecurityException {
+            final String authTag64Url, KeySource keySource)
+            throws IOException, GeneralSecurityException, IllegalStateException, InvalidCipherTextException {
         // Read ephemeral X25519 key pair
         final JsonNode header = JSON.MAPPER.readTree(Base64URL.decode_pad_utf8_base64Url(headerJcs64Url));
         final JsonNode ephemeralPublicKeyJWK = header.get("epk");
@@ -199,26 +184,44 @@ public class X25519JweService {
     /// No Compression
     static byte[] _decryptWithSharedSecret(final String headerJcs64Url, final byte[] sharedSecret,
             final String nonce64Url, final String cipherText64Url, final String authTag64Url)
-            throws GeneralSecurityException {
+            throws GeneralSecurityException, IllegalStateException, InvalidCipherTextException {
         // Derive shared key
         final byte[] cek = _deriveSharedKey(sharedSecret, Base64URL.decode_pad_utf8_base64Url(nonce64Url));
         return _decryptAuthJWE(headerJcs64Url, cek, nonce64Url, cipherText64Url, authTag64Url);
     }
 
     static byte[] _decryptAuthJWE(final String jcs_utf8_base64urlHeader, final byte[] cek, final String nonce64Url,
-            final String cipherText64Url, final String authTag64Url) throws GeneralSecurityException {
-        // TODO research on why authenticcated encryption is not accepted in the native
-        // hashmac implementation DartHmac.
-        // Computes the Additional Authenticated Data (AAD) for the specified
-        // final aad = ascii.encode(jcs_utf8_base64urlHeader);
+            final String cipherText64Url, final String authTag64Url)
+            throws IllegalStateException, InvalidCipherTextException {
+        final byte[] aad = jcs_utf8_base64urlHeader.getBytes(StandardCharsets.US_ASCII);
+        final byte[] nonce = Base64URL.decode_pad_utf8_base64Url(nonce64Url);
 
-        AesCtrJceCipher _cypher = new AesCtrJceCipher(cek, 16);
-        byte[] plainBytes = _cypher.decrypt(Base64URL.decode_pad_utf8_base64Url(cipherText64Url));
-        byte[] computedMac = _mac(cek, plainBytes);
-        byte[] providedMac = Base64URL.decode_pad_utf8_base64Url(authTag64Url);
-        if (!Arrays.equals(computedMac, providedMac)) {
-            throw new IllegalStateException("Message authentication code not available.");
-        }
-        return plainBytes;
+        // Encrypt the plain text according to the JWE ENC
+        // 16 bytes iv size (128 bits standard)
+        final GCMBlockCipher _cypher = new GCMBlockCipher(new AESEngine());
+        _cypher.init(false, new AEADParameters(new KeyParameter(cek), 128, nonce, aad));
+        final byte[] cipherBytes = Base64URL.decode_pad_utf8_base64Url(cipherText64Url);
+        final byte[] macBytes = Base64URL.decode_pad_utf8_base64Url(authTag64Url);
+        final byte[] cipherBytesWMac = new byte[cipherBytes.length + macBytes.length];
+        System.arraycopy(cipherBytes, 0, cipherBytesWMac, 0, cipherBytes.length);
+        System.arraycopy(macBytes, 0, cipherBytesWMac, cipherBytes.length, macBytes.length);
+        byte[] processed = process(_cypher, cipherBytesWMac);
+        return processed;
+    }
+
+    private static byte[] process(GCMBlockCipher cypher, byte[] data)
+            throws IllegalStateException, InvalidCipherTextException {
+        final byte[] out = new byte[cypher.getOutputSize(data.length)];
+        int len = cypher.processBytes(data, 0, data.length, out, 0);
+        len += cypher.doFinal(out, len);
+        final byte[] result = new byte[len];
+        System.arraycopy(out, 0, result, 0, len);
+        return result;
+    }
+
+    private static byte[] removeMac(byte[] cipherBytesWMac, byte[] mac) {
+        final byte[] cipherBytes = new byte[cipherBytesWMac.length - mac.length];
+        System.arraycopy(cipherBytesWMac, 0, cipherBytes, 0, cipherBytesWMac.length - mac.length);
+        return cipherBytes;
     }
 }
