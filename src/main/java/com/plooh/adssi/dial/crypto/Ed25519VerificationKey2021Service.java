@@ -9,6 +9,8 @@ import com.plooh.adssi.dial.data.OctetKeyPair;
 import com.plooh.adssi.dial.data.OctetPublicKey;
 import com.plooh.adssi.dial.encode.Base64URL;
 
+import io.ipfs.multibase.Multibase;
+
 public class Ed25519VerificationKey2021Service extends CommonCurveKeyService<OctetKeyPair, OctetPublicKey> {
     public static final String KEY_ID_SUFFIX = "key-Ed25519-";
     public static final String VERIFICATION_METHOD_TYPE = "Ed25519VerificationKey2021";
@@ -35,6 +37,11 @@ public class Ed25519VerificationKey2021Service extends CommonCurveKeyService<Oct
         String publicKey = Base64URL.encode_base64Url_utf8_nopad(okp.getPublicKey());
         OctetPublicKey opk = OctetPublicKey.builder().kid(keyID).keyUse(KEY_USE).curve(CURVE).x(publicKey).build();
         return OctetKeyPair.builder().d(privateKey).publicKey(opk).build();
+    }
+
+    public OctetPublicKey octetPublicKey(String publicKeyMultibase, String keyId) {
+        String publicKey = Base64URL.encode_base64Url_utf8_nopad(Multibase.decode(publicKeyMultibase));
+        return OctetPublicKey.builder().kid(keyId).keyUse(KEY_USE).curve(CURVE).x(publicKey).build();
     }
 
     public List<OctetKeyPair> keyPairs(int qty, int startIndex, String did) {

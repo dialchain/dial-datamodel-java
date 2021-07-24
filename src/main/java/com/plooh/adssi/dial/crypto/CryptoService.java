@@ -7,6 +7,7 @@ public class CryptoService {
     public static final X25519KeyAgreementKey2021Service x25519KeyService = X25519KeyAgreementKey2021Service.instance;
     public static final Secp256k1VerificationKey2021Service secp256k1KeyService = Secp256k1VerificationKey2021Service.instance;
     public static final JcsBase64Ed25519JWS2021Service ed25519JwsService = new JcsBase64Ed25519JWS2021Service();
+    public static final X25519JweService x25519JweService = new X25519JweService();
 
     public static CommonCurveKeyService findKeyService(String keyType) {
         if (Ed25519VerificationKey2021Service.VERIFICATION_METHOD_TYPE.equals(keyType))
