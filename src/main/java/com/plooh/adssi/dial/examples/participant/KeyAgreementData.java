@@ -1,8 +1,8 @@
 package com.plooh.adssi.dial.examples.participant;
 
 import com.plooh.adssi.dial.data.EncodedECKey;
+import com.plooh.adssi.dial.data.KeyAgreement;
 import com.plooh.adssi.dial.data.SignatureAssertionMethod;
-import com.plooh.adssi.dial.data.VerificationMethod;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VerificationMethodData {
+public class KeyAgreementData {
     private String id;
     private EncodedECKey keyPair;
-    private VerificationMethod verificationMethod;
+    private KeyAgreement keyAgreement;
     private SignatureAssertionMethod assertionMethod;
 }

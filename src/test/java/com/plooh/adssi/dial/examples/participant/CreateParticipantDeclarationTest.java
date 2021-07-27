@@ -24,7 +24,7 @@ public class CreateParticipantDeclarationTest {
     @Test
     void testVerifyStaticDeclaration() throws IOException {
         String participantRecord = ReadFileUtils.readString(
-                "./src/test/resources/java-test-data/z3F3P8rTpf8vP2zGv6BWqtrCNrW4WG3rQzYXBAv22ZXtm-did.json");
+                "./src/test/resources/java-test-data/z5jmoGvXJ34TH7CdcLiCE5KE48J1vpwoqFQEpQhaEJnSm-did.json");
         VerifyParticipantDeclaration verifyParticipantDeclaration = new VerifyParticipantDeclaration();
 
         boolean verified = verifyParticipantDeclaration.handle(participantRecord);
@@ -39,5 +39,10 @@ public class CreateParticipantDeclarationTest {
 
         boolean verified = verifyParticipantDeclaration.handle(participantRecord);
         assertTrue(verified);
+    }
+
+    @Test
+    void testHandle2() {
+
     }
 }

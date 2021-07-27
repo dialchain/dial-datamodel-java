@@ -46,12 +46,12 @@ public class X25519KeyAgreementKey2021Service extends CommonCurveKeyService<Octe
         return OctetPublicKey.builder().kid(keyId).keyUse(KEY_USE).curve(CURVE).x(publicKey).build();
     }
 
-    public List<OctetKeyPair> keyPairs(int qty, int startIndex, String did) {
-        return keyPairs(qty, startIndex, did, KEY_ID_SUFFIX);
+    public List<OctetKeyPair> keyPairs(int qty, int startIndex, String did, String creationDate) {
+        return keyPairs(qty, startIndex, did, creationDate, KEY_ID_SUFFIX);
     }
 
-    public List<OctetKeyPair> keyPairs(int qty, String did) {
-        return keyPairs(qty, 0, did);
+    public List<OctetKeyPair> keyPairs(int qty, String did, String creationDate) {
+        return keyPairs(qty, 0, did, creationDate);
     }
 
     @Override
@@ -66,5 +66,10 @@ public class X25519KeyAgreementKey2021Service extends CommonCurveKeyService<Octe
 
     public byte[] publicKeyFromBase64Url(String publicKey64Url) {
         return Base64URL.decode_pad_utf8_base64Url(publicKey64Url);
+    }
+
+    @Override
+    public String getType() {
+        return VERIFICATION_METHOD_TYPE;
     }
 }

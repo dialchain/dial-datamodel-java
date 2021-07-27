@@ -1,0 +1,81 @@
+{
+    "type": "Declaration",
+    "declaration": [
+        {
+            "id": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU",
+            "type": "Perfomance",
+            "created": "2021-07-26T19:21:47Z",
+            "controller": [
+                "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU"
+            ],
+            "account": [
+                {
+                    "network": "org.bitcoin.production",
+                    "address": "bc1q69dz3sgwtpt3kd0ml779h4rldqaejusd6d4fnn",
+                    "control": {
+                        "quorum": 1,
+                        "verificationMethod": [
+                            "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#key-Secp256k1-1"
+                        ]
+                    }
+                }
+            ],
+            "verificationMethod": [
+                {
+                    "type": "Ed25519VerificationKey2021",
+                    "id": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#key-Ed25519-0",
+                    "publicKeyMultibase": "z5CyjAv9WxFwZqNLHQutyRybwmB6ZuqpKo2E1EwKKwPHo"
+                },
+                {
+                    "type": "Secp256k1VerificationKey2021",
+                    "id": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#key-Secp256k1-1",
+                    "publicKeyMultibase": "z23mc96gRz48FLRpijBZY45sP4WXKqDU7qpXck3jBUFzxY"
+                }
+            ],
+            "keyAgreement": [
+                {
+                    "type": "Ed25519VerificationKey2021",
+                    "id": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU-2021-07-26T19:21:47Z-key-X25519-2",
+                    "publicKeyMultibase": "zEF49qFSP2Gka4TqW4tHxQ8Z9AaPq5o4BGMRSRj1D2zv1"
+                }
+            ],
+            "service": [
+                {
+                    "type": "PublisherService",
+                    "id": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#PublisherService-0",
+                    "serviceEndpoint": "https://node0.first-dial.io/zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU/publisher"
+                },
+                {
+                    "type": "PublisherService",
+                    "id": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#PublisherService-1",
+                    "serviceEndpoint": "https://node23.all-cloud.net/zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU/publisher"
+                },
+                {
+                    "type": "PublisherService",
+                    "id": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#PublisherService-2",
+                    "serviceEndpoint": "https://www1.empire.us/zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU/publisher"
+                }
+            ]
+        }
+    ],
+    "proof": [
+        {
+            "issuer": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU",
+            "created": "2021-07-26T19:21:47Z",
+            "proofPurpose": "PoP",
+            "type": "JcsBase64Ed25519Signature2021",
+            "verificationMethod": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#key-Ed25519-0",
+            "signatureValue": "Dlg1JTU_495MMM4iMMNqydHTskL7n-iqYVqjQGs1cq_UPjDMNHMzelxMHmS7HtlHkGhv28QrO1SS5Ppyzvw8BQ",
+            "nonce": "c516d49e-a705-4366-b704-a682811a56fe"
+        },
+        {
+            "issuer": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU",
+            "created": "2021-07-26T19:21:47Z",
+            "proofPurpose": "PoP",
+            "type": "JcsBase64Secp256k1Signature2021",
+            "verificationMethod": "zGrhSzwLzhxDHUfvgdCYvCA6TQTCePoumfLqJKBcXZ9qU#2021-07-26T19:21:47Z#key-Secp256k1-1",
+            "signatureValue": "MEUCIQDOkCcwuXXcaQklm2wLQHQWt2rQf9PtDxIXTIyBQjai5AIgF8oe28xggQAjsMC3f1tKCBwTaTYCYeWxu_pRTxHsC3Y",
+            "nonce": "a41ff63c-c4fd-4fa1-9fc5-eeada54227f5"
+        }
+    ]
+}

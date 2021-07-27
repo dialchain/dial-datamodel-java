@@ -26,15 +26,17 @@ public abstract class CommonCurveKeyService<T, PK> {
         return new EncodedECKey(getPrivateKeyBytes(privateKey), publicKeyEnncoded(publicKey));
     }
 
-    public List<T> keyPairs(int qty, int startIndex, String did, String prefix) {
+    public List<T> keyPairs(int qty, int startIndex, String did, String creationDate, String prefix) {
         List<T> result = new ArrayList<>();
         for (int i = 0; i < qty; i++) {
-            result.add(genKeyPair(did + prefix + (i + startIndex)));
+            result.add(genKeyPair(did + "-" + creationDate + "-" + prefix + (i + startIndex)));
         }
         return result;
     }
 
     public abstract T genKeyPair(String keyID);
+
+    public abstract String getType();
 
     protected abstract byte[] getPublicKeyBytes(PK publicKey);
 
