@@ -1,5 +1,7 @@
 package com.plooh.adssi.dial.crypto;
 
+import com.plooh.adssi.dial.crypto.dial.Neighborhood;
+
 public class CryptoService {
     public static final JcsBase64Ed25519Signature2021Service ed25519SignatureService = new JcsBase64Ed25519Signature2021Service();
     public static final JcsBase64Secp256k1Signature2021Service secp256k1SignatureService = new JcsBase64Secp256k1Signature2021Service();
@@ -8,6 +10,7 @@ public class CryptoService {
     public static final Secp256k1VerificationKey2021Service secp256k1KeyService = Secp256k1VerificationKey2021Service.instance;
     public static final JcsBase64Ed25519JWS2021Service ed25519JwsService = new JcsBase64Ed25519JWS2021Service();
     public static final X25519JweService x25519JweService = new X25519JweService();
+    public static final Neighborhood enp = Neighborhood.enp;
 
     public static CommonCurveKeyService findKeyService(String keyType) {
         if (Ed25519VerificationKey2021Service.VERIFICATION_METHOD_TYPE.equals(keyType))
