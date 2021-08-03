@@ -4,13 +4,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.bitcoinj.core.Sha256Hash;
@@ -110,14 +108,19 @@ public class NeighborhoodProtocol {
         return distances;
     }
 
-    /// Drops a declaration into the closest neighbourhood for validation.
-    Sha256Hash dropDeclarationInNeigbourhood(List<Sha256Hash> anchors, Sha256Hash declaration) {
-        // OrderedMap will use the natural order of the keys.
-        TreeMap<Double, Sha256Hash> distances = new TreeMap<Double, Sha256Hash>();
-        anchors.stream().forEach(anchor -> distances.put(distance(anchor, declaration), anchor));
-
-        // fisrt etry is the closest neighbour
-        return distances.firstEntry().getValue();
+    /// Drops a declaration into the target neighbourhood for validation.
+    public Neighborhood dropDeclarationIntoNeigbourhood(NeiborhoodsAnchor partitions, String declarationId) {
+        final Sha256Hash anchorHash = Sha256Hash.of(partitions.getAnchor().getBytes(StandardCharsets.UTF_8));
+        final Sha256Hash declHash = Sha256Hash.of(declarationId.getBytes(StandardCharsets.UTF_8));
+        final double distanceToAnchor = distance(anchorHash, Sha256Hash.of(_concat(anchorHash, declHash)));
+        for (Neighborhood neighborhood : partitions.getNeighborhoods().values()) {
+            if ((neighborhood.getBoundarySouth() == null || neighborhood.getBoundarySouth() <= distanceToAnchor)
+                    && (neighborhood.getBoundaryNorth() == null
+                            || neighborhood.getBoundaryNorth() > distanceToAnchor)) {
+                return neighborhood;
+            }
+        }
+        throw new IllegalStateException("Declaration not in boundary.");
     }
 
     double distance(Sha256Hash s1, Sha256Hash s2) {
@@ -125,7 +128,7 @@ public class NeighborhoodProtocol {
         return euc.compute(_fromSha256(s1), _fromSha256(s2));
     }
 
-    double[] _fromSha256(Sha256Hash elt) {
+    private double[] _fromSha256(Sha256Hash elt) {
         byte[] eltBytes = elt.getBytes();
         double[] result = new double[eltBytes.length];
         for (int j = 0; j < eltBytes.length; j++) {
@@ -133,5 +136,12 @@ public class NeighborhoodProtocol {
             result[j] = eltBytes[j] & 0xff;
         }
         return result;
+    }
+
+    private byte[] _concat(Sha256Hash a, Sha256Hash b) {
+        byte[] concatArray = new byte[a.getBytes().length + b.getBytes().length];
+        System.arraycopy(a.getBytes(), 0, concatArray, 0, a.getBytes().length);
+        System.arraycopy(b.getBytes(), 0, concatArray, a.getBytes().length, b.getBytes().length);
+        return concatArray;
     }
 }
