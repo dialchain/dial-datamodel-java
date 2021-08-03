@@ -17,8 +17,6 @@ import com.plooh.adssi.dial.data.OrganizationMember;
 import com.plooh.adssi.dial.data.ParticipantDeclaration;
 import com.plooh.adssi.dial.data.Proof;
 import com.plooh.adssi.dial.data.ProofPurpose;
-import com.plooh.adssi.dial.data.Service;
-import com.plooh.adssi.dial.data.ServiceNames;
 import com.plooh.adssi.dial.data.TreasuryAccount;
 import com.plooh.adssi.dial.data.TreasuryAccountControler;
 import com.plooh.adssi.dial.data.VerificationMethod;
@@ -84,16 +82,6 @@ public class CreateValidatorDeclaration {
         treasuryAccount.setControl(control);
         organizationDeclaration.setAccount(Arrays.asList(treasuryAccount));
 
-        organizationDeclaration.setService(new ArrayList<Service>());
-        addService(organizationDeclaration, 0, "https://node0.first-dial-validator.io/publisher",
-                ServiceNames.PublisherService.name());
-        addService(organizationDeclaration, 1, "https://node1.first-dial-validator.io/publisher",
-                ServiceNames.PublisherService.name());
-        addService(organizationDeclaration, 2, "https://node2.first-dial-validator.io/publisher",
-                ServiceNames.PublisherService.name());
-        addService(organizationDeclaration, 0, "https://open.first-dial-validator.io/lookup",
-                ServiceNames.LookupService.name());
-
         Proof ed25519Proof = new Proof();
         ed25519Proof.setIssuer(organizationDeclaration.getId());
         ed25519Proof.setProofPurpose(ProofPurpose.PoP.name());
@@ -107,14 +95,4 @@ public class CreateValidatorDeclaration {
         return signedRecord;
     }
 
-    private void addService(OrganizationDeclaration organizationDeclaration, int index, String url,
-            String serviceType) {
-        Service service = new Service();
-        service.setId(organizationDeclaration.getId() + "#" + organizationDeclaration.getCreated() + "#" + serviceType
-                + "-" + index);
-        service.setAssertionMethod(organizationDeclaration.getAssertionMethod().get(0).getId());
-        service.setType(serviceType);
-        service.setServiceEndpoint(url);
-        organizationDeclaration.getService().add(service);
-    }
 }

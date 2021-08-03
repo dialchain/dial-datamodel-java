@@ -34,7 +34,7 @@ public class SignValidatorDeclaration {
                 .get(0);
         List<String> assertionMethods = Arrays.asList(voteAssertionMethod.getId(), signatureAssertionmethod.getId());
 
-        VerificationMethodData verificationMethodData = participant.getVerificationMethod()
+        VerificationMethodData verificationMethodData = (VerificationMethodData) participant.getVerificationMethod()
                 .get(signatureAssertionmethod.getVerificationMethod());
 
         Proof proof = new Proof();
