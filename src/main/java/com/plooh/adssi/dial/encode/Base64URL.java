@@ -5,7 +5,7 @@ import java.util.Base64;
 
 import com.plooh.adssi.dial.jcs.JCS;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Base64URL {
     public static String encode_base64Url_utf8_nopad(byte[] bytes) {

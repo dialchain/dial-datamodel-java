@@ -20,7 +20,7 @@ import com.plooh.adssi.dial.jcs.JCS;
 import com.plooh.adssi.dial.json.JSON;
 import com.plooh.adssi.dial.key.KeySource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
