@@ -14,7 +14,7 @@ import com.plooh.adssi.dial.encode.Base64URL;
 import com.plooh.adssi.dial.jcs.JCS;
 import com.plooh.adssi.dial.json.JSON;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class JcsBase64Ed25519JWS2021Service {
 
