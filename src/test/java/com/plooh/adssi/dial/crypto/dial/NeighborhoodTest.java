@@ -20,6 +20,7 @@ import com.plooh.adssi.dial.json.JSON;
 import com.plooh.adssi.dial.parser.TimeFormat;
 import com.plooh.adssi.dial.util.DataUtil;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.bitcoinj.core.Sha256Hash;
 import org.junit.jupiter.api.Test;
 
@@ -177,6 +178,50 @@ public class NeighborhoodTest {
         NeiborhoodsAnchor na2 = CryptoService.enp.partitionMembersToNeighbourhoods(na.getAnchor(),
                 new ArrayList<>(na.getMembers()), 11);
         assertTrue(DataUtil.eq(na2.getNeighborhoods(), na.getNeighborhoods()));
+    }
+
+    @Test
+    public void neighBorhood50000_StandardDeviation() throws IOException {
+        String data = ReadFileUtils.readString("src/test/resources/dart-test-data/sample-population-81.json");
+        NeiborhoodsAnchor partitions = JSON.MAPPER.readValue(data, NeiborhoodsAnchor.class);
+        final Map<Neighborhood, Integer> drops = new HashMap<>();
+        final int totalDecl = 50000;
+        for (var i = 0; i < totalDecl; i++) {
+            final String declarationId = UUID.randomUUID().toString();
+            Neighborhood neigbourhood = CryptoService.enp.dropDeclarationIntoNeigbourhood(partitions, declarationId);
+            assertTrue(neigbourhood != null);
+            if (!drops.containsKey(neigbourhood)) {
+                drops.put(neigbourhood, 0);
+            }
+            drops.put(neigbourhood, drops.get(neigbourhood) + 1);
+        }
+        SummaryStatistics stats = new SummaryStatistics();
+        drops.values().forEach(d -> {
+            stats.addValue(d);
+        });
+        assertTrue(stats.getStandardDeviation() * 2 < stats.getMean());
+    }
+
+    @Test
+    public void neighBorhood150000_StandardDeviation() throws IOException {
+        String data = ReadFileUtils.readString("src/test/resources/dart-test-data/sample-population-181303.json.dat");
+        NeiborhoodsAnchor partitions = JSON.MAPPER.readValue(data, NeiborhoodsAnchor.class);
+        final Map<Neighborhood, Integer> drops = new HashMap<>();
+        final int totalDecl = 150000;
+        for (var i = 0; i < totalDecl; i++) {
+            final String declarationId = UUID.randomUUID().toString();
+            Neighborhood neigbourhood = CryptoService.enp.dropDeclarationIntoNeigbourhood(partitions, declarationId);
+            assertTrue(neigbourhood != null);
+            if (!drops.containsKey(neigbourhood)) {
+                drops.put(neigbourhood, 0);
+            }
+            drops.put(neigbourhood, drops.get(neigbourhood) + 1);
+        }
+        SummaryStatistics stats = new SummaryStatistics();
+        drops.values().forEach(d -> {
+            stats.addValue(d);
+        });
+        assertTrue(stats.getStandardDeviation() * 2 < stats.getMean());
     }
 
     private String _keyId() {
